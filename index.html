@@ -89,7 +89,7 @@ fetch(url)
     .then(function(response){return response.json();})
     .then(function(response) {
   		let doc = new DOMParser().parseFromString(response.parse.text["*"], 'text/html')
-       console.log(doc.getElementsByClassName("infobox biography vcard"))
+//        console.log(doc.getElementsByClassName("infobox biography vcard"))
       
   
        d3.select('body').append("div")
