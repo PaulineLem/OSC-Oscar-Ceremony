@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <style>
+    body { margin:0;position:fixed;top:0;right:0;bottom:0;left:0; }
+  </style>
+</head>
+
+
+<body>
+  <script>
+    
+        var margin = {top: 20, right: 20, bottom: 20, left: 20};
+   
+
+    var width = 960 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
+        
+     var svg = d3.select("body").append("svg")
+    .attr("width", 960)
+    .attr("height", 500)  
+ var data = d3.json('https://datahub.io/rufuspollock/oscars-nominees-and-winners/datapackage.json', function(error, dataset){ 
+
+  for (const id in dataset.resources) {
+    if (dataset.resources[id].format === "csv") {
+      const file = dataset.resources[id]
+     	var data_csv = d3.csv(file.path, function(error, csv){ 
+       var space = [width/2, height/2]
+      
+			draw_scatter(csv, margin.left, space[0], margin.top, space[1], 'ACTRESS IN A LEADING ROLE', true, 'plot0')
+        
+
+       
+      draw_scatter(csv, margin.left + space[0], 2 *space[0], margin.top , space[1], 'ACTOR IN A LEADING ROLE', true, 'plot2' )
+         
+			})
+		}
+ }
+              
+ })
+     function draw_scatter(data, x_start, x_end, y_start, y_end, category, winner, id) {
+
+
+			let liste = []
+			data.forEach(function(line) {
+        if (line.category=== category && (line.winner==="True") && (parseInt(line.year) >2000)) {
+          liste.push(line)
+        }
+        
+     })
+       
+       
+      svg.selectAll('.'+id).
+      data(liste).enter()
+      	.append('text')
+      	.attr("x",  x_start + margin.left)
+      	.attr("y", function(d,i){return y_start + 20*(i+1)} )
+        .attr('stroke-width', 1)
+        .style('fill', 'black')
+   			.style('stroke','')
+      	.text(function(d) { return d.year})
+      
+     svg.selectAll('.'+id).
+      data(liste).enter()
+      	.append('text')
+      	.attr("x",  x_start + margin.left + 40)
+      	.attr("y", function(d,i){return y_start +20*(i+1)} )
+        .attr('stroke-width', 1)
+        .style('fill', 'black')
+   			.style('stroke','')
+      	.text(function(d) { return d.entity})
+     
+
+     
+     
+     var url = "https://en.wikipedia.org/w/api.php"; 
+
+var params = {
+    action: "parse",
+    page: "Jean Dujardin",
+    format: "json"
+};
+
+url = url + "?origin=*";
+Object.keys(params).forEach(function(key){url += "&" + key + "=" + params[key];});
+
+fetch(url)
+    .then(function(response){return response.json();})
+    .then(function(response) {
+  		let doc = new DOMParser().parseFromString(response.parse.text["*"], 'text/html')
+       console.log(doc.getElementsByClassName("infobox biography vcard"))
+      
+  
+       d3.select('body').append("div")
+                    .attr('pointer-events', 'none')
+                    .attr("class", "tooltip")
+                    .style("opacity", 1)
+                    .html(doc.getElementsByClassName("infobox biography vcard"))
+
+  
+  			
+    })
+    .catch(function(error){console.log(error);});
+
+    }
+
+    
+
+
+    
+    
+
+
+    
+    
+  
+  </script>
+</body>
+
