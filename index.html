@@ -2,6 +2,12 @@
 <head>
   <meta charset="utf-8">
   <script src="https://d3js.org/d3.v4.min.js"></script>
+      <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+          
   <style>
     body { margin:0;position:fixed;top:0;right:0;bottom:0;left:0; }
   </style>
@@ -9,9 +15,53 @@
 
 
 <body>
+  
+    <div class="input-field col s12">
+    <select>
+      <option value="" disabled selected>Choose your option</option>
+      <option value="1">Option 1</option>
+      <option value="2">Option 2</option>
+      <option value="3">Option 3</option>
+    </select>
+    <label>Materialize Select</label>
+  </div>
+  
+<!--     <div class="input-field">
+    <select multiple>
+      <option value="" >Choose your option</option>
+      <option value='ACTRESS IN A LEADING ROLE'>ACTRESS IN A LEADING ROLE</option>
+      <option value='ACTOR IN A LEADING ROLE'>ACTOR IN A LEADING ROLE</option>
+      <option value="ACTRESS IN A SUPPORTING ROLE">ACTRESS IN A SUPPORTING ROLE</option>
+      <option value="ACTOR IN A SUPPORTING ROLE">ACTOR IN A SUPPORTING ROLE</option>
+    </select>
+    <label>Materialize Multiple Select</label>
+  </div> -->
+  
+  
+  
+  <div id="my_dataviz"></div>
+
+  <script type="text/javascript" src="js/materialize.min.js">
+    
+      document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('select');
+    var instances = M.FormSelect.init(elems, options);
+  });
+
+  // Or with jQuery
+
+  $(document).ready(function(){
+    $('select').formSelect();
+  });
+    
+    console.log('couc', instance.getSelectedValues();
+                
+)
+    
+  </script>
   <script>
     
-        var margin = {top: 20, right: 20, bottom: 20, left: 20};
+        var margin = {top: 100, right: 20, bottom: 20, left: 20};
    
 
     var width = 960 - margin.left - margin.right,
@@ -20,42 +70,167 @@
      var svg = d3.select("body").append("svg")
     .attr("width", 960)
     .attr("height", 500)  
- var data = d3.json('https://datahub.io/rufuspollock/oscars-nominees-and-winners/datapackage.json', function(error, dataset){ 
+ var data = d3.json('https://raw.githubusercontent.com/PaulineLem/OSC-Oscar-Ceremony/master/data_json_v2_pict.json', function(error, dataset){ 
 
-  for (const id in dataset.resources) {
-    if (dataset.resources[id].format === "csv") {
-      const file = dataset.resources[id]
-     	var data_csv = d3.csv(file.path, function(error, csv){ 
-       var space = [width/2, height/2]
+
+       var space = [width/2, height]
+       console.log(dataset)
+       
+       
+             draw_list(dataset, margin.left, space[0], margin.top, space[1], 'ACTRESS IN A LEADING ROLE', true, 'plot0' )
+         
       
-			draw_scatter(csv, margin.left, space[0], margin.top, space[1], 'ACTRESS IN A LEADING ROLE', true, 'plot0')
+			draw_scatter(dataset,margin.left + space[0], 2 *space[0], margin.top , space[1],  'ACTRESS IN A LEADING ROLE', true, 'plot1')
+
         
 
        
-      draw_scatter(csv, margin.left + space[0], 2 *space[0], margin.top , space[1], 'ACTOR IN A LEADING ROLE', true, 'plot2' )
-         
-			})
-		}
- }
+
+
+
               
  })
      function draw_scatter(data, x_start, x_end, y_start, y_end, category, winner, id) {
-
-
+       
+			var parsedTime = d3.timeParse("%Y-%m-%d")
+      var displayTime = d3.timeFormat("%Y-%m-%d") 
 			let liste = []
 			data.forEach(function(line) {
-        if (line.category=== category && (line.winner==="True") && (parseInt(line.year) >2000)) {
-          liste.push(line)
-        }
+        if (line.category=== category && (parseInt(line.year) >2000)) {
+          let line_out = line
+              
+          var start = new Date(parseInt(line.year), 02, 01); 
+          var end = parsedTime(line.date)
+  
+        // Calling the timeDay() function to 
+        // calculate the difference between two dates 
+        	var a = d3.timeYear.count(end, start); 
+         line_out["age"] = a
+  
+        // Getting the calculated dates 
+
+           
+//           console.log(line_out["age"])
+          liste.push(line_out)
+                      
+      }
+        
         
      })
-       
+          
+      
+//      console.log(liste)
+        // Compute quartiles, median, inter quantile range min and max --> these info are then used to draw the box.
+  var sumstat = d3.nest() // nest function allows to group the calculation per level of a factor
+    .key(function(d) {return parseInt(d.year);})
+    .rollup(function(d) {
+      q1 = d3.quantile(d.map(function(g) { return parseInt(g.age);}).sort(d3.ascending),.25)
+      median = d3.quantile(d.map(function(g) { return parseInt(g.age);}).sort(d3.ascending),.5)
+      q3 = d3.quantile(d.map(function(g) { return parseInt(g.age);}).sort(d3.ascending),.75)
+      interQuantileRange = q3 - q1
+      min = q1 - 1.5 * interQuantileRange
+      max = q3 + 1.5 * interQuantileRange
+      return( {q1: q1, median: median, q3: q3, interQuantileRange: interQuantileRange, min: min, max: max})
+      
+    })
+    .entries(liste)
+  
+
+  
+    // Show the X scale
+  var x = d3.scaleLinear()
+    .range([ x_start, x_end ])
+    .domain([2000, 2018])
+//     .paddingInner(1)
+//     .paddingOuter(.5)
+  svg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x))
+
+  // Show the Y scale
+  var y = d3.scaleLinear()
+    .domain([0,100])
+    .range([y_end, y_start])
+
+  svg.append("g")
+    .attr("transform", "translate("+ x_start.toString() +", 0)")
+  .call(d3.axisLeft().scale(y))
+
+  // Show the main vertical line
+  svg
+    .selectAll("vertLines")
+    .data(sumstat)
+    .enter()
+    .append("line")
+      .attr("x1", function(d){ return(x(parseInt(d.key)))})
+      .attr("x2", function(d){return(x(parseInt(d.key)))})
+      .attr("y1", function(d){return(y(d.value.min))})
+      .attr("y2", function(d){return(y(d.value.max))})
+      .attr("stroke", "black")
+      .style("width", 40)
+  
+
+  // rectangle for the main box
+  var boxWidth = 25
+  svg
+    .selectAll("boxes")
+    .data(sumstat)
+    .enter()
+    .append("rect")
+        .attr("x", function(d){return(x(parseInt(d.key))-boxWidth/2 )})
+        .attr("y", function(d){return(y(d.value.q3))})
+        .attr("height", function(d){return(y(d.value.q1)-y(d.value.q3))})
+        .attr("width", boxWidth )
+        .attr("stroke", "black")
+        .style("fill", "#b7a164")
+
+  // Show the median
+  svg
+    .selectAll("medianLines")
+    .data(sumstat)
+    .enter()
+    .append("line")
+      .attr("x1", function(d){return(x(parseInt(d.key))-boxWidth/2) })
+      .attr("x2", function(d){return(x(parseInt(d.key))+boxWidth/2) })
+      .attr("y1", function(d){return(y(d.value.median))})
+      .attr("y2", function(d){return(y(d.value.median))})
+      .attr("stroke", "black")
+      .style("width", 80)
+
+// Add individual points with jitter
+var jitterWidth = 5
+svg
+  .selectAll("indPoints")
+  .data(liste)
+  .enter()
+  .append("circle")
+    .attr("cx", function(d){ return(x(parseInt(d.year)) - jitterWidth/2 + Math.random()*jitterWidth )})
+    .attr("cy", function(d){return(y(d.age))})
+    .attr("r", 4)
+    .style("fill", "white")
+    .attr("stroke", "black")
+
+    }
+
+  function draw_list(data, x_start, x_end, y_start, y_end, category, winner, id) {
+      
+  
+     	var parsedTime = d3.timeParse("%Y-%m-%d")
+      var displayTime = d3.timeFormat("%Y-%m-%d") 
+			let liste = []
+			data.forEach(function(line) {
+        if (line.category=== category && line.winner === "True") {
+          liste.push(line)                  
+      }
+        
+        
+     })  
        
       svg.selectAll('.'+id).
       data(liste).enter()
       	.append('text')
       	.attr("x",  x_start + margin.left)
-      	.attr("y", function(d,i){return y_start + 20*(i+1)} )
+      	.attr("y", function(d,i){return y_start + 30*(i+1)} )
         .attr('stroke-width', 1)
         .style('fill', 'black')
    			.style('stroke','')
@@ -65,56 +240,65 @@
       data(liste).enter()
       	.append('text')
       	.attr("x",  x_start + margin.left + 40)
-      	.attr("y", function(d,i){return y_start +20*(i+1)} )
+      	.attr("y", function(d,i){return y_start +30*(i+1)} )
         .attr('stroke-width', 1)
         .style('fill', 'black')
    			.style('stroke','')
       	.text(function(d) { return d.entity})
+     .on("mouseover", function(e){
+         d3.selectAll('Text')
+        .style('fill', function(d) {
+           if (d===e) {
+             return '#b7a164'
+           } else {
+             return 'black'
+           }
+         })
+         d3.selectAll('Circle')
+         .style('fill', function(d) {
+           if (d===e) {
+             return 'grey'
+           } else {
+             return 'white'
+           }
+         })
+
+        
+      })
+       .on("mouseout", function(d){
+         d3.selectAll('Text')
+        .style('fill', 'black')
+         d3.selectAll('Circle')
+       .style('fill', 'white')
+
+         
+
+     })
      
-
-     
-     
-     var url = "https://en.wikipedia.org/w/api.php"; 
-
-var params = {
-    action: "parse",
-    page: "Jean Dujardin",
-    format: "json"
-};
-
-url = url + "?origin=*";
-Object.keys(params).forEach(function(key){url += "&" + key + "=" + params[key];});
-
-fetch(url)
-    .then(function(response){return response.json();})
-    .then(function(response) {
-  		let doc = new DOMParser().parseFromString(response.parse.text["*"], 'text/html')
-//        console.log(doc.getElementsByClassName("infobox biography vcard"))
-      
+            
+          
+     svg.selectAll('.'+id).
+      data(liste).enter()
+     .append('image')
+     .attr("x",  x_start + margin.left + 200)
+     .attr("y", function(d,i){return y_start +30*(i)} )
+    .attr('xlink:href', function(d) {
+       var link = "https://www.salonlfc.com/wp-content/uploads/2018/01/image-not-found-1-scaled-1150x647.png"
+       if (d["picture_link"]) {link = d["picture_link"]}
+       return link})
+    .attr('width', 30)
+    .attr('height', 30)
+    
+  }
   
-       d3.select('body').append("div")
-                    .attr('pointer-events', 'none')
-                    .attr("class", "tooltip")
-                    .style("opacity", 1)
-                    .html(doc.getElementsByClassName("infobox biography vcard"))
-
-  
-  			
-    })
-    .catch(function(error){console.log(error);});
-
-    }
-
     
+ 
+       
 
 
-    
-    
 
-
-    
-    
   
   </script>
-</body>
 
+
+</body>
