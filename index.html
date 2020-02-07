@@ -89,7 +89,7 @@ var selected_year = []
 var margin = {top: 100, right: 20, bottom: 20, left: 20};
    
 var width = 960 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom;
+        height = 15000 - margin.top - margin.bottom;
         
 var svg = d3.select("body").append("svg")
     .attr("width", 960)
@@ -428,7 +428,7 @@ svg
     .attr('xlink:href', function(d) {
        var link = ""
        if (d.winner === "True"){
-        link = "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.flaticon.com%2Ffree-icon%2Foscar_206982&psig=AOvVaw217jGiFmO1-HyfRakOhwDu&ust=1581178468217000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCKjYlvnqv-cCFQAAAAAdAAAAABAI"
+        link = "http://fr.web.img3.acsta.net/r_640_360/medias/nmedia/19/01/12/30/20642080.jpg"
        }
       return link})         
     .attr('width', 50)
