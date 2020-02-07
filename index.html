@@ -25,14 +25,16 @@
 
   
     <div class="input-field col s12">
-    <select id = "test">
-      <option value="" >Choose your option</option>
-      <option value='ACTRESS IN A LEADING ROLE'>ACTRESS IN A LEADING ROLE</option>
-      <option value='ACTOR IN A LEADING ROLE'>ACTOR IN A LEADING ROLE</option>
-      <option value="ACTRESS IN A SUPPORTING ROLE">ACTRESS IN A SUPPORTING ROLE</option>
-      <option value="ACTOR IN A SUPPORTING ROLE">ACTOR IN A SUPPORTING ROLE</option>
+    <select multiple id = "category">
     </select>
-    <label>Materialize Multiple Select</label>
+    <label>Select category</label>
+  </div>
+          <div class="input-field col s12">
+
+          <select multiple id = "year">
+
+    </select>
+    <label>Select year</label>
   </div>
   
   
@@ -49,6 +51,27 @@
   <script>
     
     
+var i=2000;
+while (i<2018) {
+    var x = document.getElementById("year");
+    var option = document.createElement("option");
+    option.text = i;
+    x.add(option);
+    i+=1
+}
+    
+var categories = ['ACTRESS IN A LEADING ROLE', 'ACTOR IN A LEADING ROLE', 'ACTRESS IN A SUPPORTING ROLE', 'ACTOR IN A SUPPORTING ROLE'];
+    
+    console.log(categories)
+    
+categories.forEach(function(cat) {
+    var x = document.getElementById("category");
+    var option = document.createElement("option");
+    option.text = cat;
+    x.add(option);
+});
+    
+    
 (function($){
   $(function(){
     // Plugin initialization
@@ -56,41 +79,65 @@
   }); 
 })(jQuery); // end of jQuery name space
   
-var selected_category = ""
+var selected_category = []
+var selected_year = []
+
 
 
   
     
-        var margin = {top: 100, right: 20, bottom: 20, left: 20};
+var margin = {top: 100, right: 20, bottom: 20, left: 20};
    
-
-    var width = 960 - margin.left - margin.right,
+var width = 960 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
         
-     var svg = d3.select("body").append("svg")
+var svg = d3.select("body").append("svg")
     .attr("width", 960)
     .attr("height", 2000)  
+
+
  var data = d3.json('https://raw.githubusercontent.com/PaulineLem/OSC-Oscar-Ceremony/master/data_json_v2_pict.json', function(error, dataset){ 
 
 
-       var space = [width/2, height]
+var space = [width/2, height]
        
+  $("#year").change(function() {
+  
+      selected_year = $('select#year').val()
+      if (Array.isArray(selected_year) === false){
+        selected_year = [selected_year]
+      }
+ 			svg.selectAll("*").remove();
+         
        
-       $("#test").change(function() {
+       $("#category").change(function() {
          
          
-  selected_category = $('select#test').val()
+  selected_category = $('select#category').val()
+  
+        if (Array.isArray(selected_category) === false){
+        selected_category = [selected_category]
+      }
  svg.selectAll("*").remove();
  
   
   
-   draw_list(dataset, margin.left, space[0], margin.top, space[1], selected_category, true, 'plot0' )
+//    draw_list(dataset, margin.left, space[0], margin.top, space[1], selected_category[0], true, 'plot0' )
          
-      
-			draw_scatter(dataset,margin.left + space[0], 2 *space[0], margin.top , space[1],  selected_category, true, 'plot1')
+   
+   draw_res(dataset, margin.left, space[0], margin.top, space[1], selected_category[0], selected_year[0], 'plot0' )
+         
+     
+   
+   for (var i = 0; i < selected_category.length; i++) {
+
+     draw_scatter(dataset,margin.left + space[0], 2 *space[0], margin.top , space[1],  selected_category[i], true, 'plot'+(i+1).toString())
+   }
 
   ;
 });
+         
+       });
 
 
         
@@ -168,48 +215,48 @@ var selected_category = ""
   .call(d3.axisLeft().scale(y))
 
   // Show the main vertical line
-  svg
-    .selectAll("vertLines")
-    .data(sumstat)
-    .enter()
-    .append("line")
-      .attr("x1", function(d){ return(x(parseInt(d.key)))})
-      .attr("x2", function(d){return(x(parseInt(d.key)))})
-      .attr("y1", function(d){return(y(d.value.min))})
-      .attr("y2", function(d){return(y(d.value.max))})
-      .attr("stroke", "black")
-      .style("width", 40)
+//   svg
+//     .selectAll("vertLines")
+//     .data(sumstat)
+//     .enter()
+//     .append("line")
+//       .attr("x1", function(d){ return(x(parseInt(d.key)))})
+//       .attr("x2", function(d){return(x(parseInt(d.key)))})
+//       .attr("y1", function(d){return(y(d.value.min))})
+//       .attr("y2", function(d){return(y(d.value.max))})
+//       .attr("stroke", "black")
+//       .style("width", 40)
   
 
   // rectangle for the main box
   var boxWidth = 25
-  svg
-    .selectAll("boxes")
-    .data(sumstat)
-    .enter()
-    .append("rect")
-        .attr("x", function(d){return(x(parseInt(d.key))-boxWidth/2 )})
-        .attr("y", function(d){return(y(d.value.q3))})
-        .attr("height", function(d){return(y(d.value.q1)-y(d.value.q3))})
-        .attr("width", boxWidth )
-        .attr("stroke", "black")
-        .style("fill", "#b7a164")
+//   svg
+//     .selectAll("boxes")
+//     .data(sumstat)
+//     .enter()
+//     .append("rect")
+//         .attr("x", function(d){return(x(parseInt(d.key))-boxWidth/2 )})
+//         .attr("y", function(d){return(y(d.value.q3))})
+//         .attr("height", function(d){return(y(d.value.q1)-y(d.value.q3))})
+//         .attr("width", boxWidth )
+//         .attr("stroke", "black")
+//         .style("fill", "#b7a164")
 
-  // Show the median
-  svg
-    .selectAll("medianLines")
-    .data(sumstat)
-    .enter()
-    .append("line")
-      .attr("x1", function(d){return(x(parseInt(d.key))-boxWidth/2) })
-      .attr("x2", function(d){return(x(parseInt(d.key))+boxWidth/2) })
-      .attr("y1", function(d){return(y(d.value.median))})
-      .attr("y2", function(d){return(y(d.value.median))})
-      .attr("stroke", "black")
-      .style("width", 80)
+//   // Show the median
+//   svg
+//     .selectAll("medianLines")
+//     .data(sumstat)
+//     .enter()
+//     .append("line")
+//       .attr("x1", function(d){return(x(parseInt(d.key))-boxWidth/2) })
+//       .attr("x2", function(d){return(x(parseInt(d.key))+boxWidth/2) })
+//       .attr("y1", function(d){return(y(d.value.median))})
+//       .attr("y2", function(d){return(y(d.value.median))})
+//       .attr("stroke", "black")
+//       .style("width", 80)
 
 // Add individual points with jitter
-var jitterWidth = 5
+var jitterWidth = 0
 svg
   .selectAll("indPoints")
   .data(liste)
@@ -302,6 +349,92 @@ svg
     
   }
   
+    
+    function draw_res(data, x_start, x_end, y_start, y_end, category, year, id) {
+      
+  
+     	var parsedTime = d3.timeParse("%Y-%m-%d")
+      var displayTime = d3.timeFormat("%Y-%m-%d") 
+			let liste = []
+			data.forEach(function(line) {
+        if (line.category=== category && line.year === year) {
+          liste.push(line)                  
+      }
+        
+        
+     })  
+       
+
+      
+      
+           svg.selectAll('.'+id).
+      data(liste).enter()
+     .append('image')
+     .attr("x",  x_start + margin.left )
+     .attr("y", function(d,i){return y_start +200*(i)} )
+    .attr('xlink:href', function(d) {
+       var link = "https://www.salonlfc.com/wp-content/uploads/2018/01/image-not-found-1-scaled-1150x647.png"
+       if (d["picture_link"]) {link = d["picture_link"]}
+       return link})
+    .attr('width', 150)
+    .attr('height', 150)
+      
+     svg.selectAll('.'+id).
+      data(liste).enter()
+      	.append('text')
+      	.attr("x",  x_start + margin.left + 170)
+      	.attr("y", function(d,i){return y_start +75+200*(i)} )
+        .attr('stroke-width', 1)
+        .style('fill', 'black')
+   			.style('stroke','')
+      	.text(function(d) { return d.entity})
+     .on("mouseover", function(e){
+         d3.selectAll('Text')
+        .style('fill', function(d) {
+           if (d===e) {
+             return '#b7a164'
+           } else {
+             return 'black'
+           }
+         })
+         d3.selectAll('Circle')
+         .style('fill', function(d) {
+           if (d===e) {
+             return 'grey'
+           } else {
+             return 'white'
+           }
+         })
+
+        
+      })
+       .on("mouseout", function(d){
+         d3.selectAll('Text')
+        .style('fill', 'black')
+         d3.selectAll('Circle')
+       .style('fill', 'white')
+
+         
+     })
+     
+            
+     
+     
+         svg.selectAll('.'+id).
+      data(liste).enter()
+     .append('image')
+     .attr("x",  x_start + margin.left+ 250 )
+     .attr("y", function(d,i){return y_start +200*(i)+30} )
+    .attr('xlink:href', function(d) {
+       var link = ""
+       if (d.winner === "True"){
+        link = "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.flaticon.com%2Ffree-icon%2Foscar_206982&psig=AOvVaw217jGiFmO1-HyfRakOhwDu&ust=1581178468217000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCKjYlvnqv-cCFQAAAAAdAAAAABAI"
+       }
+      return link})         
+    .attr('width', 50)
+    .attr('height', 50)
+    
+  }
     
  
    
