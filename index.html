@@ -13,12 +13,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-alpha.4/js/materialize.min.js"></script>
           
   <style>
-    body { margin:0;position:fixed;top:0;right:0;bottom:0;left:0; }
+    body { margin:0;top:0;right:0;bottom:0;left:0; background-color: brown;  }
   </style>
 </head>
 
 
-<body>
+<body >
 
   
   
@@ -82,18 +82,25 @@ categories.forEach(function(cat) {
 var selected_category = []
 var selected_year = []
 
+var w = window,
+    d = document,
+    e = d.documentElement,
+    g = d.getElementsByTagName('body')[0],
+    x = w.innerWidth || e.clientWidth || g.clientWidth,
+    y = w.innerHeight|| e.clientHeight|| g.clientHeight;
+
 
 
   
     
 var margin = {top: 100, right: 20, bottom: 20, left: 20};
    
-var width = 960 - margin.left - margin.right,
-        height = 5000 - margin.top - margin.bottom;
+var width = x- margin.left - margin.right,
+        height = y - margin.top - margin.bottom;
         
 var svg = d3.select("body").append("svg")
-    .attr("width", 960)
-    .attr("height", 5000)  
+    .attr("width", x)
+    .attr("height", y)  
 
 
  var data = d3.json('https://raw.githubusercontent.com/PaulineLem/OSC-Oscar-Ceremony/master/data_json_v2_pict.json', function(error, dataset){ 
@@ -107,47 +114,62 @@ var space = [width/2, height]
       if (Array.isArray(selected_year) === false){
         selected_year = [selected_year]
       }
- 			svg.selectAll("*").remove();
-         
+             svg.selectAll("*").remove();
+             launch_drawing(selected_year, selected_category, dataset,  margin, space)
+    
+      
+    });  
        
        $("#category").change(function() {
          
          
-  selected_category = $('select#category').val()
+selected_category = $('select#category').val()
   
         if (Array.isArray(selected_category) === false){
         selected_category = [selected_category]
       }
  svg.selectAll("*").remove();
+ launch_drawing(selected_year, selected_category, dataset,  margin, space)
+    });
  
   
   
 //    draw_list(dataset, margin.left, space[0], margin.top, space[1], selected_category[0], true, 'plot0' )
-         
+
+// for (var i = 0; i < selected_year.length; i++) {        
    
-   draw_res(dataset, margin.left, space[0], margin.top, space[1], selected_category[0], selected_year[0], 'plot0' )
+
          
      
    
-   for (var i = 0; i < selected_category.length; i++) {
+//    for (var i = 0; i < selected_category.length; i++) {
+//     draw_res(dataset, margin.left, space[0], margin.top, space[1], selected_category[0], selected_year[0], 'plot0' )
 
-     draw_scatter(dataset,margin.left + space[0], 2 *space[0], margin.top , space[1],  selected_category[i], true, 'plot'+(i+1).toString())
-   }
+//      draw_scatter(dataset,margin.left + space[0], 2 *space[0], margin.top , space[1],  selected_category[i], true, 'plot'+(i+1).toString())
+//    }
+// }
 
   ;
-});
-         
-       });
-
-
-        
-
-       
-
-
 
               
  })
+function launch_drawing(selected_year, selected_category, dataset,  margin, space ){
+    if (selected_year && selected_category) {
+        for (var i = 0; i < selected_year.length; i++) {        
+
+   
+for (var j = 0; j < selected_category.length; j++) {
+ draw_res(dataset, margin.left, space[0], margin.top, space[1], selected_category[j], selected_year[i], 'plot'+(i+1).toString())
+
+  draw_scatter(dataset,margin.left + space[0], 2 *space[0], margin.top , space[1],  selected_category[j], true, 'plot'+(j+1).toString())
+}
+}
+    }
+
+
+  ;}
+
+
      function draw_scatter(data, x_start, x_end, y_start, y_end, category, winner, id) {
        
 			var parsedTime = d3.timeParse("%Y-%m-%d")
@@ -435,12 +457,7 @@ svg
     .attr('height', 50)
     
   }
-    
- 
    
   </script>
-  
-
-
-
+ 
 </body>
