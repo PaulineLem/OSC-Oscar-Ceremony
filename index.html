@@ -29,16 +29,11 @@
     </select>
     <label>Select category</label>
   </div>
-          <div class="input-field col s12">
+  <div class="input-field col s12">
+      <div> </div>
 
-          <select multiple id = "year">
+    <h3 id = "selected_year"> </h3>
 
-    </select>
-    <label>Select year</label>
-  </div>
-  
-  
-  
   <div id="my_dataviz"></div>
   
 
@@ -49,20 +44,9 @@
  
 
   <script>
-    
-    
-var i=2000;
-while (i<2018) {
-    var x = document.getElementById("year");
-    var option = document.createElement("option");
-    option.text = i;
-    x.add(option);
-    i+=1
-}
-    
+  
 var categories = ['ACTRESS IN A LEADING ROLE', 'ACTOR IN A LEADING ROLE', 'ACTRESS IN A SUPPORTING ROLE', 'ACTOR IN A SUPPORTING ROLE'];
     
-    console.log(categories)
     
 categories.forEach(function(cat) {
     var x = document.getElementById("category");
@@ -80,7 +64,8 @@ categories.forEach(function(cat) {
 })(jQuery); // end of jQuery name space
   
 var selected_category = []
-var selected_year = []
+var selected_year = 2001
+
 
 var w = window,
     d = document,
@@ -93,10 +78,10 @@ var w = window,
 
   
     
-var margin = {top: 100, right: 20, bottom: 20, left: 20};
+var margin = {top: 50, right: 20, bottom: 20, left: 20};
    
 var width = x- margin.left - margin.right,
-        height = y - margin.top - margin.bottom;
+    height = y - margin.top - margin.bottom;
         
 var svg = d3.select("body").append("svg")
     .attr("width", x)
@@ -108,46 +93,42 @@ var svg = d3.select("body").append("svg")
 
 var space = [width/2, height]
        
-  $("#year").change(function() {
-  
-      selected_year = $('select#year').val()
-      if (Array.isArray(selected_year) === false){
-        selected_year = [selected_year]
-      }
-             svg.selectAll("*").remove();
-             launch_drawing(selected_year, selected_category, dataset,  margin, space)
-    
-      
-    });  
+
        
-       $("#category").change(function() {
-         
-         
+$("#category").change(function() {     
 selected_category = $('select#category').val()
   
-        if (Array.isArray(selected_category) === false){
+if (Array.isArray(selected_category) === false){
         selected_category = [selected_category]
       }
  svg.selectAll("*").remove();
  launch_drawing(selected_year, selected_category, dataset,  margin, space)
     });
  
+var scale_x = d3.scaleLinear()
+    .range([ margin.left + space[0], 2 *space[0] ])
+    .domain([2000, 2018])
+
+svg.on("click", function() {
+
+    var coords = d3.mouse(this);
+    if ((coords[0] > margin.left + space[0]) && (coords[0]< 2 *space[0]) && (coords[1] > margin.top ) && (coords[1] <space[1])) {
+            if (scale_x.invert(coords[0])- Math.floor(scale_x.invert(coords[0]))>0.5) {
+            selected_year =Math.ceil(scale_x.invert(coords[0]))
+        }
+        else {
+            selected_year =Math.floor(scale_x.invert(coords[0]))
+        }
+        svg.selectAll(".selected_year").remove();
+        svg.selectAll("*").remove();
+
+    document.getElementById('selected_year').textContent = selected_year;
+
+    launch_drawing(selected_year, selected_category, dataset,  margin, space )
+}
+
+})
   
-  
-//    draw_list(dataset, margin.left, space[0], margin.top, space[1], selected_category[0], true, 'plot0' )
-
-// for (var i = 0; i < selected_year.length; i++) {        
-   
-
-         
-     
-   
-//    for (var i = 0; i < selected_category.length; i++) {
-//     draw_res(dataset, margin.left, space[0], margin.top, space[1], selected_category[0], selected_year[0], 'plot0' )
-
-//      draw_scatter(dataset,margin.left + space[0], 2 *space[0], margin.top , space[1],  selected_category[i], true, 'plot'+(i+1).toString())
-//    }
-// }
 
   ;
 
@@ -155,22 +136,48 @@ selected_category = $('select#category').val()
  })
 function launch_drawing(selected_year, selected_category, dataset,  margin, space ){
     if (selected_year && selected_category) {
-        for (var i = 0; i < selected_year.length; i++) {        
+        draw_selected_year(margin.left + space[0], 2 *space[0], margin.top , space[1],  selected_year)
 
-   
-for (var j = 0; j < selected_category.length; j++) {
- draw_res(dataset, margin.left, space[0], margin.top, space[1], selected_category[j], selected_year[i], 'plot'+(i+1).toString())
+        for (var j = 0; j < selected_category.length; j++) {
+            draw_res(dataset, margin.left, space[0], margin.top, space[1], selected_category[j], selected_year,j, 'plot'+(j+1).toString())
 
-  draw_scatter(dataset,margin.left + space[0], 2 *space[0], margin.top , space[1],  selected_category[j], true, 'plot'+(j+1).toString())
+            draw_scatter(dataset,margin.left + space[0], 2 *space[0], margin.top , space[1],  selected_category[j], selected_year,  true, 'plot'+(j*10+1).toString())
+        }
 }
-}
-    }
+    
 
 
   ;}
 
+  function color_circle(act){
+         if (act.winner === "True") {return "yellow"}
+         else {return "white"}
 
-     function draw_scatter(data, x_start, x_end, y_start, y_end, category, winner, id) {
+     }
+
+
+     function draw_selected_year( x_start, x_end,  y_start, y_end, selected_year){
+
+    var scale_x = d3.scaleLinear()
+    .range([ x_start, x_end ])
+    .domain([2000, 2018])
+        var boxWidth = 25
+
+svg.selectAll(".selected_year").remove();
+svg.append("rect")
+  .attr("class", "selected_year")
+  .attr("x", scale_x(selected_year)-boxWidth/2)
+  .attr("y", y_start)
+  .attr("height", y_end-y_start)
+  .attr("width", boxWidth )
+  .attr("stroke", "grey")
+  .attr("fill-opacity", 0.3)
+  .style("fill", "grey")
+     }
+
+
+     function draw_scatter(data, x_start, x_end, y_start, y_end, category, selected_year, winner, id) {
+
        
 			var parsedTime = d3.timeParse("%Y-%m-%d")
       var displayTime = d3.timeFormat("%Y-%m-%d") 
@@ -197,10 +204,7 @@ for (var j = 0; j < selected_category.length; j++) {
         
         
      })
-          
-      
-//      console.log(liste)
-        // Compute quartiles, median, inter quantile range min and max --> these info are then used to draw the box.
+
   var sumstat = d3.nest() // nest function allows to group the calculation per level of a factor
     .key(function(d) {return parseInt(d.year);})
     .rollup(function(d) {
@@ -218,14 +222,14 @@ for (var j = 0; j < selected_category.length; j++) {
 
   
     // Show the X scale
-  var x = d3.scaleLinear()
+  var scale_x = d3.scaleLinear()
     .range([ x_start, x_end ])
     .domain([2000, 2018])
-//     .paddingInner(1)
-//     .paddingOuter(.5)
+
   svg.append("g")
     .attr("transform", "translate(0," + height + ")")
-    .call(d3.axisBottom(x))
+    .call(d3.axisBottom(scale_x))
+
 
   // Show the Y scale
   var y = d3.scaleLinear()
@@ -236,61 +240,68 @@ for (var j = 0; j < selected_category.length; j++) {
     .attr("transform", "translate("+ x_start.toString() +", 0)")
   .call(d3.axisLeft().scale(y))
 
-  // Show the main vertical line
-//   svg
-//     .selectAll("vertLines")
-//     .data(sumstat)
-//     .enter()
-//     .append("line")
-//       .attr("x1", function(d){ return(x(parseInt(d.key)))})
-//       .attr("x2", function(d){return(x(parseInt(d.key)))})
-//       .attr("y1", function(d){return(y(d.value.min))})
-//       .attr("y2", function(d){return(y(d.value.max))})
-//       .attr("stroke", "black")
-//       .style("width", 40)
-  
 
-  // rectangle for the main box
-  var boxWidth = 25
-//   svg
-//     .selectAll("boxes")
-//     .data(sumstat)
-//     .enter()
-//     .append("rect")
-//         .attr("x", function(d){return(x(parseInt(d.key))-boxWidth/2 )})
-//         .attr("y", function(d){return(y(d.value.q3))})
-//         .attr("height", function(d){return(y(d.value.q1)-y(d.value.q3))})
-//         .attr("width", boxWidth )
-//         .attr("stroke", "black")
-//         .style("fill", "#b7a164")
 
-//   // Show the median
-//   svg
-//     .selectAll("medianLines")
-//     .data(sumstat)
-//     .enter()
-//     .append("line")
-//       .attr("x1", function(d){return(x(parseInt(d.key))-boxWidth/2) })
-//       .attr("x2", function(d){return(x(parseInt(d.key))+boxWidth/2) })
-//       .attr("y1", function(d){return(y(d.value.median))})
-//       .attr("y2", function(d){return(y(d.value.median))})
-//       .attr("stroke", "black")
-//       .style("width", 80)
 
-// Add individual points with jitter
-var jitterWidth = 0
+
+
+
+var jitterWidth = 10
 svg
   .selectAll("indPoints")
   .data(liste)
   .enter()
   .append("circle")
-    .attr("cx", function(d){ return(x(parseInt(d.year)) - jitterWidth/2 + Math.random()*jitterWidth )})
+    .attr("cx", function(d){ return(scale_x(parseInt(d.year)) - jitterWidth/2 + Math.random()*jitterWidth )})
     .attr("cy", function(d){return(y(d.age))})
     .attr("r", 4)
-    .style("fill", "white")
+    .style("fill", function(d) {return color_circle(d)})
     .attr("stroke", "black")
 
-    }
+    .on("mouseover", function(e){
+         d3.selectAll('Text')
+        .style('fill', function(d) {
+           if (d.entity===e.entity) {
+             return '#b7a164'
+           } else {
+             return 'grey'
+           }
+         })
+         d3.selectAll('Circle')
+         .style('fill', function(d) {
+           if (d.entity===e.entity) {
+             return 'red'
+           } else {
+             return color_circle(d)
+           }
+         })
+        .attr('r', function(d) {
+           if (d===e) {
+             return 6
+           } else {
+             return 4
+           }
+         })
+
+        
+      })
+       .on("mouseout", function(e){
+         d3.selectAll('Text')
+        .style('fill', 'grey')
+         d3.selectAll('Circle')
+       .style('fill', function(d) {return color_circle(d)})
+       .attr('r', 4)
+  
+     })
+
+
+
+
+}
+
+
+
+
 
   function draw_list(data, x_start, x_end, y_start, y_end, category, winner, id) {
       
@@ -371,72 +382,117 @@ svg
     
   }
   
+
     
-    function draw_res(data, x_start, x_end, y_start, y_end, category, year, id) {
+    function draw_res(data, x_start, x_end, y_start, y_end, category, year, j_id,  id) {
+
       
   
      	var parsedTime = d3.timeParse("%Y-%m-%d")
       var displayTime = d3.timeFormat("%Y-%m-%d") 
 			let liste = []
 			data.forEach(function(line) {
-        if (line.category=== category && line.year === year) {
+        if (line.category=== category && parseInt(line.year) === year) {
           liste.push(line)                  
-      }
-        
-        
+      }     
      })  
        
+
 
       
       
            svg.selectAll('.'+id).
       data(liste).enter()
      .append('image')
-     .attr("x",  x_start + margin.left )
-     .attr("y", function(d,i){return y_start +200*(i)} )
+     .attr("x",  function(d,i){return x_start +110*(i)} )
+     .attr("y", y_start+170*j_id)
     .attr('xlink:href', function(d) {
        var link = "https://www.salonlfc.com/wp-content/uploads/2018/01/image-not-found-1-scaled-1150x647.png"
        if (d["picture_link"]) {link = d["picture_link"]}
        return link})
-    .attr('width', 150)
-    .attr('height', 150)
-      
-     svg.selectAll('.'+id).
-      data(liste).enter()
-      	.append('text')
-      	.attr("x",  x_start + margin.left + 170)
-      	.attr("y", function(d,i){return y_start +75+200*(i)} )
-        .attr('stroke-width', 1)
-        .style('fill', 'black')
-   			.style('stroke','')
-      	.text(function(d) { return d.entity})
-     .on("mouseover", function(e){
+    .attr('width', 90)
+    .attr('height', 90)
+    .on("mouseover", function(e){
          d3.selectAll('Text')
         .style('fill', function(d) {
-           if (d===e) {
+           if (d.entity===e.entity) {
              return '#b7a164'
            } else {
-             return 'black'
+             return 'grey'
            }
          })
          d3.selectAll('Circle')
          .style('fill', function(d) {
-           if (d===e) {
-             return 'grey'
+           if (d.entity===e.entity) {
+             return 'red'
            } else {
-             return 'white'
+             return color_circle(d)
+           }
+         })
+        .attr('r', function(d) {
+           if (d===e) {
+             return 6
+           } else {
+             return 4
            }
          })
 
         
       })
-       .on("mouseout", function(d){
+       .on("mouseout", function(e){
          d3.selectAll('Text')
-        .style('fill', 'black')
+        .style('fill', 'grey')
          d3.selectAll('Circle')
-       .style('fill', 'white')
+       .style('fill', function(d) {return color_circle(d)})
+       .attr('r', 4)
 
-         
+  
+     })
+      
+     svg.selectAll('.'+id).
+      data(liste).enter()
+      	.append('text')
+      	.attr("x",  function(d,i){return x_start +110*(i)})
+      	.attr("y", y_start+170*j_id+110)
+        .attr('stroke-width', 0.8)
+        .style('fill', 'grey')
+   		.style('stroke','')
+      	.text(function(d) { return d.entity})
+          .on("mouseover", function(e){
+         d3.selectAll('Text')
+        .style('fill', function(d) {
+           if (d.entity===e.entity) {
+             return '#b7a164'
+           } else {
+             return 'grey'
+           }
+         })
+         d3.selectAll('Circle')
+         .style('fill', function(d) {
+           if (d.entity===e.entity) {
+             return 'red'
+           } else {
+             return color_circle(d)
+           }
+         })
+        .attr('r', function(d) {
+           if (d===e) {
+             return 6
+           } else {
+             return 4
+           }
+         })
+
+        
+      })
+       .on("mouseout", function(e){
+         d3.selectAll('Text')
+        .style('fill', 'grey')
+         d3.selectAll('Circle')
+       .style('fill', function(d) {return color_circle(d)})
+       .attr('r', 4)
+
+  
      })
      
             
@@ -445,8 +501,8 @@ svg
          svg.selectAll('.'+id).
       data(liste).enter()
      .append('image')
-     .attr("x",  x_start + margin.left+ 250 )
-     .attr("y", function(d,i){return y_start +200*(i)+30} )
+     .attr("x", function(d,i){return x_start +110*(i)+20}  )
+     .attr("y", y_start+170*j_id+95)
     .attr('xlink:href', function(d) {
        var link = ""
        if (d.winner === "True"){
