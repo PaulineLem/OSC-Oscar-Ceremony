@@ -123,6 +123,7 @@ svg.on("click", function() {
         svg.selectAll(".selected_year").remove();
         svg.selectAll("*").remove();
 
+
     document.getElementById('selected_year').textContent = selected_year;
 
     launch_drawing(selected_year, selected_category, dataset,  margin, space )
@@ -211,7 +212,6 @@ svg.append("rect")
          .style("border-radius", "5px")
          .style("padding", "5px")
          .style("visibility", "hidden")
-         .text("a simple tooltip");
 
 console.log('year1', selected_year)
 			var parsedTime = d3.timeParse("%Y-%m-%d")
@@ -323,6 +323,9 @@ svg
 // Souris sur le scatter plot
     .on("mouseover", function(e){
         tooltip.style("visibility", "visible")
+        tooltip.html("Name : " + e.entity + "<br>Age : " + e.age )
+        .style("top", (event.pageY-10)+"px")
+        .style("left",(event.pageX+10)+"px")
 
          d3.select("#legend_"+ e.name.replace(/\s+/g, '').replace(/\./g, ''))
         .style('fill', 'black')
@@ -344,10 +347,6 @@ svg
            else {return 1}
          })
 
-         .on("mousemove", function(e){
-            return tooltip.html("Name : " + e.entity + "<br>Age : " + e.age )
-            .style("top", (event.pageY-10)+"px")
-            .style("left",(event.pageX+10)+"px");})
 
 // highlight pie chart slice
       if (parseInt(e.year )=== parseInt(selected_year)){
@@ -359,13 +358,14 @@ svg
       .style('font-size', 22)}
     })
 
-
+    .on('click', function(e) { tooltip
+    .style("visibility", "hidden")
+        })
 // highlight pie chart legend
 
 
        .on("mouseout", function(e){
-         tooltip
-        .style("visibility", "hidden")
+
         d3.select("#legend_"+ e.name.replace(/\s+/g, '').replace(/\./g, ''))
         .style('fill', 'grey')
         .style('font-weight','normal')
@@ -375,6 +375,11 @@ svg
 
        .style("stroke-width", function(d){if (d.winner === 'True'){return 1}})
        .attr('r', 4)
+
+
+       tooltip
+      .style("visibility", "hidden")
+
 
        d3.selectAll('#arc_'+(e.place).replace(/\s+/g, '').replace(/\./g, ""))
        .style('opacity', 0.5)
@@ -491,7 +496,7 @@ function draw_selected_category(x_start, y_start, category, id){
         .style("border-radius", "5px")
         .style("padding", "5px")
       	.style("visibility", "hidden")
-      	.text("a simple tooltip");
+
 
 
 
