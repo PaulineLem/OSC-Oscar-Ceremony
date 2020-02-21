@@ -252,10 +252,14 @@ svg.append("rect")
   svg.append("g")
     .attr("transform", "translate(0," + height + ")")
     .call(d3.axisBottom(scale_x))
+	    
+     
 
     svg.append("text")
       .attr('id', 'axisx')
-       .attr("transform", "translate(1330,600)")
+             .attr("transform",
+            "translate(" + (width/2) + " ," + 
+                           (height + margin.top + 20) + ")")
        .style('font-size', 12)
        .style("text-anchor", "middle")
        .text("year");
@@ -271,8 +275,11 @@ svg.append("rect")
   .call(d3.axisLeft().scale(y))
 
   svg.append("text")
-    .attr('id', 'axisy')
-     .attr("transform", "translate(670,320)")
+    .attr('id', 'axisy')	     
+      .attr("transform", "rotate(-90)")
+      .attr("y", 0 - margin.left)
+      .attr("x",0 - (height / 2))
+      .attr("dy", "1em")
      .style('font-size', 12)
      .style("text-anchor", "middle")
      .text("Age");
