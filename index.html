@@ -201,7 +201,7 @@ svg.append("rect")
 
      function draw_scatter(data, x_start, x_end, y_start, y_end, category, selected_year, winner, id) {
 
-
+console.log('year1', selected_year)
 			var parsedTime = d3.timeParse("%Y-%m-%d")
       var displayTime = d3.timeFormat("%Y-%m-%d")
 			let liste = []
@@ -321,15 +321,21 @@ svg
            }
            else {return 1}
          })
+
 // highlight pie chart slice
-         d3.selectAll('#arc_'+(e.place).replace(/\s+/g, '').replace(/\./g, ""))
-         .style('opacity', 1)
+      if (parseInt(e.year )=== parseInt(selected_year)){
+        return d3.selectAll( '#arc_'+(e.place).replace(/\s+/g, '').replace(/\./g, ""))
+      .style('opacity', 1),
+      d3.selectAll('#arclegend_'+(e.place).replace(/\s+/g, '').replace(/\./g, ""))
+      .style('font-weigth', 'bold')
+      .style('opacity', 1)
+      .style('font-size', 22)}
+    })
+
+
 // highlight pie chart legend
-         d3.selectAll('#arclegend_'+(e.place).replace(/\s+/g, '').replace(/\./g, ""))
-         .style('font-weigth', 'bold')
-         .style('opacity', 1)
-         .style('font-size', 22)
-      })
+
+
        .on("mouseout", function(e){
         d3.select("#legend_"+ e.name)
         .style('fill', 'grey')
@@ -635,8 +641,8 @@ console.log('liste_pie', liste)
       .outerRadius(radius)
 
     //var color = d3.scaleOrdinal(d3.schemeCategory20)
-    var color = d3.scaleOrdinal()
-        .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"])
+    var color = d3.scaleOrdinal(d3.schemeCategory20)
+        //.range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"])
 
 
     // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
