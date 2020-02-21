@@ -14,6 +14,7 @@
 
   <style>
     body { margin:0;top:0;right:0;bottom:0;left:0; }
+    h1 {color:#b7a164; }
   </style>
 </head>
 
@@ -23,17 +24,19 @@
 
 
 
+    <h1 align="center"> Les disparités aux Oscars (2001-2017)</h1>
 
     <div class="input-field col s12">
     <select multiple id = "category">
     </select>
-    <label>Select category</label>
+    <label>Select a category</label>
   </div>
-  <div class="input-field col s12">
-      <div> </div>
+  <div class="input-field col s12"></div>
 
-    <h3 id = "selected_year"> </h3>
+    <h3 id = "selected_year"  align="center" style="color:grey" default="2001"> </h3>
+    <div  align="center" style="color:grey"> Cliquer sur le graphique pour sélectionner l'année</div>
 
+    
   <div id="my_dataviz"></div>
 
 
@@ -142,7 +145,7 @@ function launch_drawing(selected_year, selected_category, dataset,  margin, spac
       //console.log('params', selected_year, selected_category)
         draw_selected_year(margin.left + space[0], 2 *space[0], margin.top + space[1]/2 , space[1],  selected_year)
         draw_selected_category(margin.left, margin.top, selected_category,'plotcat')
-        draw_piechart(dataset,  space[0] , space[1]/4, selected_category, selected_year, 'plotpie' )
+        draw_piechart(dataset,  space[0] , space[1]/4 + 50, selected_category, selected_year, 'plotpie' )
 
         for (var j = 0; j < selected_category.length; j++) {
 
@@ -629,7 +632,7 @@ console.log('liste_res', liste)
        liste.push(line)
    }
  })}
-    	var radius = 125
+    	var radius = 100
 
     // append the svg object to the div called 'nationality'
 
