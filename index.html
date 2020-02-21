@@ -259,10 +259,10 @@ svg.append("rect")
       .attr('id', 'axisx')
              .attr("transform",
             "translate(" + (x_start+(x_end-x_start)/2) + " ," + 
-                           (height + margin.top + 10) + ")")
+                           (height + margin.top ) + ")")
        .style('font-size', 12)
        .style("text-anchor", "middle")
-       .text("year");
+       .text("Year");
 
 
   // Show the Y scale
@@ -276,13 +276,14 @@ svg.append("rect")
 
   svg.append("text")
     .attr('id', 'axisy')	     
-      .attr("transform", "rotate(-90)")
-             .attr("transform",
-            "translate(" + (x_start-20) + " ," + 
-                           y_start+(y_end-y_start)/2 + ")")
-     .style('font-size', 12)
-     .style("text-anchor", "middle")
-     .text("Age");
+    .attr("transform", "rotate(-90)")
+      .attr("y",  (x_start-60) )
+      .attr("x",-y_start- (y_end-y_start)/2)
+      .attr("dy", "1em")
+      .style("text-anchor", "middle")
+           .style('font-size', 12)
+
+      .text("Age");   
 
 
 
@@ -399,7 +400,7 @@ svg
       	.attr("x",  x_start + margin.left + 40)
       	.attr("y", function(d,i){return y_start +30*(i+1)} )
         .attr('stroke-width', 1)
-
+        .style('font-size', 10)
       	.text(function(d) { return d.entity})
 
      .on("mouseover", function(e){
@@ -558,6 +559,7 @@ console.log('liste_res', liste)
       	.attr("x",  function(d,i){return x_start +110*(i)})
       	.attr("y", y_start+170*j_id+110)
         .style('fill', 'grey')
+        .style('font-size', 12)
       	.text(function(d) { return d.entity})
 
 
