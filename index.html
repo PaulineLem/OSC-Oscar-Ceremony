@@ -201,6 +201,18 @@ svg.append("rect")
 
      function draw_scatter(data, x_start, x_end, y_start, y_end, category, selected_year, winner, id) {
 
+       var tooltip = d3.select("body")
+         .append("div")
+         .style("position", "absolute")
+         .style("z-index", "10")
+         .style("background-color", "white")
+         .style("border", "solid")
+         .style("border-width", "2px")
+         .style("border-radius", "5px")
+         .style("padding", "5px")
+         .style("visibility", "hidden")
+         .text("a simple tooltip");
+
 console.log('year1', selected_year)
 			var parsedTime = d3.timeParse("%Y-%m-%d")
       var displayTime = d3.timeFormat("%Y-%m-%d")
@@ -310,6 +322,8 @@ svg
 
 // Souris sur le scatter plot
     .on("mouseover", function(e){
+        tooltip.style("visibility", "visible")
+
          d3.select("#legend_"+ e.name.replace(/\s+/g, '').replace(/\./g, ''))
         .style('fill', 'black')
         .style('font-weight', 'bold')
@@ -330,6 +344,11 @@ svg
            else {return 1}
          })
 
+         .on("mousemove", function(e){
+            return tooltip.html("Name : " + e.entity + "<br>Age : " + e.age )
+            .style("top", (event.pageY-10)+"px")
+            .style("left",(event.pageX+10)+"px");})
+
 // highlight pie chart slice
       if (parseInt(e.year )=== parseInt(selected_year)){
         return d3.selectAll( '#arc_'+(e.place).replace(/\s+/g, '').replace(/\./g, ""))
@@ -345,6 +364,8 @@ svg
 
 
        .on("mouseout", function(e){
+         tooltip
+        .style("visibility", "hidden")
         d3.select("#legend_"+ e.name.replace(/\s+/g, '').replace(/\./g, ''))
         .style('fill', 'grey')
         .style('font-weight','normal')
@@ -410,7 +431,7 @@ svg
       	.text(function(d) { return d.entity})
 
      .on("mouseover", function(e){
-         d3.selectAll('#legend'+e.name.replace(/\s+/g, '').replace(/\./g, ''))
+         d3.selectAll('#legend'+e.name)
         .style('fill', 'grey')
         .style('font-weight', 'normal')
 
@@ -506,7 +527,7 @@ console.log('liste_res', liste)
       tooltip.style("visibility", "visible")
 
 //Souris sur une photo
-         d3.selectAll('#legend_'+ e.name.replace(/\s+/g, '').replace(/\./g, ''))
+         d3.selectAll('#legend_'+ e.name)
         .style('fill', 'black')
         .style('font-weight', 'bold')
 
@@ -536,7 +557,7 @@ console.log('liste_res', liste)
           .style("left",(event.pageX+10)+"px");})
 
        .on("mouseout", function(e){
-         d3.selectAll('#legend_'+e.name.replace(/\s+/g, '').replace(/\./g, ''))
+         d3.selectAll('#legend_'+e.name)
         .style('fill', 'grey')
         .style('font-weight', 'normal')
 
