@@ -310,7 +310,7 @@ svg
 
 // Souris sur le scatter plot
     .on("mouseover", function(e){
-         d3.select("#legend_"+ e.name)
+         d3.select("#legend_"+ e.name.replace(/\s+/g, '').replace(/\./g, ''))
         .style('fill', 'black')
         .style('font-weight', 'bold')
 
@@ -345,7 +345,7 @@ svg
 
 
        .on("mouseout", function(e){
-        d3.select("#legend_"+ e.name)
+        d3.select("#legend_"+ e.name.replace(/\s+/g, '').replace(/\./g, ''))
         .style('fill', 'grey')
         .style('font-weight','normal')
 
@@ -410,7 +410,7 @@ svg
       	.text(function(d) { return d.entity})
 
      .on("mouseover", function(e){
-         d3.selectAll('#legend'+e.name)
+         d3.selectAll('#legend'+e.name.replace(/\s+/g, '').replace(/\./g, ''))
         .style('fill', 'grey')
         .style('font-weight', 'normal')
 
@@ -506,7 +506,7 @@ console.log('liste_res', liste)
       tooltip.style("visibility", "visible")
 
 //Souris sur une photo
-         d3.selectAll('#legend_'+ e.name)
+         d3.selectAll('#legend_'+ e.name.replace(/\s+/g, '').replace(/\./g, ''))
         .style('fill', 'black')
         .style('font-weight', 'bold')
 
@@ -536,7 +536,7 @@ console.log('liste_res', liste)
           .style("left",(event.pageX+10)+"px");})
 
        .on("mouseout", function(e){
-         d3.selectAll('#legend_'+e.name)
+         d3.selectAll('#legend_'+e.name.replace(/\s+/g, '').replace(/\./g, ''))
         .style('fill', 'grey')
         .style('font-weight', 'normal')
 
@@ -672,7 +672,7 @@ console.log('liste_pie', liste)
 // highlight results
         .on("mouseover", function(e){
           liste.forEach(function(line) {if (e.data.key === line.place){
-          return d3.selectAll("#legend_"+line.name)
+          return d3.selectAll("#legend_"+line.name.replace(/\s+/g, '').replace(/\./g, ''))
          .style('fill','black')
            .style('font-weight', 'bold')}})
 // highlight pie chart slice
@@ -693,7 +693,7 @@ console.log('liste_pie', liste)
          })
 
          .on("mouseout", function(e){liste.forEach(function(line) {if (e.data.key === line.place){
-           return d3.selectAll("#legend_"+line.name)
+           return d3.selectAll("#legend_"+line.name.replace(/\s+/g, '').replace(/\./g, ''))
           .style('fill','grey')
             .style('font-weight', 'normal')}})
 
