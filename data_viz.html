@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+      <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+   <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-alpha.4/js/materialize.min.js"></script>
+
+  <style>
+    body { margin:0;top:0;right:0;bottom:0;left:0; }
+  </style>
+</head>
+
+
+<body >
+
+
+
+
+
+    <div class="input-field col s12">
+    <select multiple id = "category">
+    </select>
+    <label>Select category</label>
+  </div>
+  <div class="input-field col s12">
+      <div> </div>
+
+    <h3 id = "selected_year"> </h3>
+
+  <div id="my_dataviz"></div>
+
+
+
+
+
+
+
+
+  <script>
+
+var categories = ['ACTRESS IN A LEADING ROLE', 'ACTOR IN A LEADING ROLE', 'ACTRESS IN A SUPPORTING ROLE', 'ACTOR IN A SUPPORTING ROLE'];
+
+
+categories.forEach(function(cat) {
+    var x = document.getElementById("category");
+    var option = document.createElement("option");
+    option.text = cat;
+    x.add(option);
+});
+
+
+(function($){
+  $(function(){
+    // Plugin initialization
+    $('select').not('.disabled').formSelect();
+  });
+})(jQuery); // end of jQuery name space
+
+var selected_category = []
+var selected_year = 2001
+
+
+var w = window,
+    d = document,
+    e = d.documentElement,
+    g = d.getElementsByTagName('body')[0],
+    x = w.innerWidth || e.clientWidth || g.clientWidth,
+    y = w.innerHeight|| e.clientHeight|| g.clientHeight;
+
+
+
+
+
+var margin = {top: 50, right: 20, bottom: 20, left: 20};
+
+var width = x- margin.left - margin.right,
+    height = y - margin.top - margin.bottom;
+
+var svg = d3.select("body").append("svg")
+    .attr("width", x)
+    .attr("height", y)
+
+
+ var data = d3.json('https://raw.githubusercontent.com/PaulineLem/OSC-Oscar-Ceremony/master/data_json_v2_pict.json', function(error, dataset){
+
+
+var space = [width/2, height]
+
+
+$("#category").change(function() {
+selected_category = $('select#category').val()
+
+if (Array.isArray(selected_category) === false){
+        selected_category = [selected_category]
+      }
+ svg.selectAll("*").remove();
+
+ launch_drawing(selected_year, selected_category, dataset,  margin, space)
+    });
+
+
+var scale_x = d3.scaleLinear()
+    .range([ margin.left + space[0], 2 *space[0] ])
+    .domain([2000, 2018])
+
+svg.on("click", function() {
+
+    var coords = d3.mouse(this);
+    if ((coords[0] > margin.left + space[0]) && (coords[0]< 2 *space[0]) && (coords[1] > margin.top ) && (coords[1] <space[1])) {
+            if (scale_x.invert(coords[0])- Math.floor(scale_x.invert(coords[0]))>0.5) {
+            selected_year =Math.ceil(scale_x.invert(coords[0]))
+        }
+        else {
+            selected_year =Math.floor(scale_x.invert(coords[0]))
+        }
+        svg.selectAll(".selected_year").remove();
+        svg.selectAll("*").remove();
+
+    document.getElementById('selected_year').textContent = selected_year;
+
+    launch_drawing(selected_year, selected_category, dataset,  margin, space )
+}
+
+})
+
+
+  ;
+
+
+ })
+function launch_drawing(selected_year, selected_category, dataset,  margin, space ){
+
+    if (selected_year && selected_category) {
+      //console.log('params', selected_year, selected_category)
+        draw_selected_year(margin.left + space[0], 2 *space[0], margin.top + space[1]/2 , space[1],  selected_year)
+        draw_selected_category(margin.left, margin.top, selected_category,'plotcat')
+        draw_piechart(dataset,  space[0] , space[1]/4, selected_category, selected_year, 'plotpie' )
+
+        for (var j = 0; j < selected_category.length; j++) {
+
+            draw_res(dataset, margin.left, space[0], margin.top, space[1], selected_category[j], selected_year,j, 'plot'+(j+1).toString())
+            draw_scatter(dataset,margin.left + space[0], 2 *space[0] , margin.top + space[1]/2 , space[1],  selected_category[j], selected_year,  true, 'plot'+(j*10+1).toString())
+
+        }
+}
+
+
+
+  ;}
+
+
+   function color_circle(act){
+          if (act.category === 'ACTRESS IN A LEADING ROLE') {return '#ff6d00'}
+          else if (act.category === 'ACTOR IN A LEADING ROLE') {return '#00796b'}
+          else if (act.category === 'ACTOR IN A SUPPORTING ROLE') {return '#b2dfdb'}
+          else {return '#ffcc80'}
+
+      }
+
+  function count_nomination(actor, data){
+    var nom = [0,0] // nomination, victoire
+    data.forEach(function(line) {
+       if (line.entity === actor.entity){
+        nom[0] += 1
+        if (line.winner === "True"){
+          nom[1] =+ 1
+        }
+      }
+    })
+      return nom
+    }
+
+
+
+     function draw_selected_year( x_start, x_end,  y_start, y_end, selected_year){
+
+    var scale_x = d3.scaleLinear()
+    .range([ x_start, x_end ])
+    .domain([2000, 2018])
+        var boxWidth = 25
+
+svg.selectAll(".selected_year").remove();
+svg.append("rect")
+  .attr("class", "selected_year")
+  .attr("x", scale_x(selected_year)-boxWidth/2)
+  .attr("y", y_start)
+  .attr("height", y_end-y_start)
+  .attr("width", boxWidth )
+  .attr("stroke", "grey")
+  .attr("fill-opacity", 0.3)
+  .style("fill", "grey")
+     }
+
+
+     function draw_scatter(data, x_start, x_end, y_start, y_end, category, selected_year, winner, id) {
+
+
+			var parsedTime = d3.timeParse("%Y-%m-%d")
+      var displayTime = d3.timeFormat("%Y-%m-%d")
+			let liste = []
+			data.forEach(function(line) {
+        if (line.category=== category && (parseInt(line.year) >2000)) {
+          let line_out = line
+
+          var start = new Date(parseInt(line.year), 02, 01);
+          var end = parsedTime(line.date)
+
+        // Calling the timeDay() function to
+        // calculate the difference between two dates
+        	var a = d3.timeYear.count(end, start);
+         line_out["age"] = a
+
+        // Getting the calculated dates
+
+
+//           console.log(line_out["age"])
+          liste.push(line_out)
+
+      }
+
+
+     })
+
+  var sumstat = d3.nest() // nest function allows to group the calculation per level of a factor
+    .key(function(d) {return parseInt(d.year);})
+    .rollup(function(d) {
+      q1 = d3.quantile(d.map(function(g) { return parseInt(g.age);}).sort(d3.ascending),.25)
+      median = d3.quantile(d.map(function(g) { return parseInt(g.age);}).sort(d3.ascending),.5)
+      q3 = d3.quantile(d.map(function(g) { return parseInt(g.age);}).sort(d3.ascending),.75)
+      interQuantileRange = q3 - q1
+      min = q1 - 1.5 * interQuantileRange
+      max = q3 + 1.5 * interQuantileRange
+      return( {q1: q1, median: median, q3: q3, interQuantileRange: interQuantileRange, min: min, max: max})
+
+    })
+    .entries(liste)
+
+
+
+    // Show the X scale
+  var scale_x = d3.scaleLinear()
+    .range([ x_start, x_end ])
+    .domain([2000, 2018])
+
+  svg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(scale_x))
+
+    svg.append("text")
+      .attr('id', 'axisx')
+       .attr("transform", "translate(1330,600)")
+       .style('font-size', 12)
+       .style("text-anchor", "middle")
+       .text("year");
+
+
+  // Show the Y scale
+  var y = d3.scaleLinear()
+    .domain([0,100])
+    .range([y_end, y_start])
+
+  svg.append("g")
+    .attr("transform", "translate("+ x_start.toString() +", 0)")
+  .call(d3.axisLeft().scale(y))
+
+  svg.append("text")
+    .attr('id', 'axisy')
+     .attr("transform", "translate(670,320)")
+     .style('font-size', 12)
+     .style("text-anchor", "middle")
+     .text("Age");
+
+
+
+
+
+
+
+var jitterWidth = 10
+svg
+  .selectAll("indPoints")
+  .data(liste)
+  .enter()
+  .append("circle")
+    .attr("id", function(d){return 'circle_'+d.name})
+    .attr("cx", function(d){ return(scale_x(parseInt(d.year)) - jitterWidth/2 + Math.random()*jitterWidth )})
+    .attr("cy", function(d){return(y(d.age))})
+    .attr("r", 4)
+    .style("fill", function(d) {return color_circle(d)})
+    .attr("stroke", "black") //couleur
+    .attr("opacity", function(d){if (d.winner === 'False'){return 0.5} })
+    .attr("stroke-width", function(d){if (d.winner === 'True'){return 1}})
+
+
+
+// Souris sur le scatter plot
+    .on("mouseover", function(e){
+         d3.select("#legend_"+ e.name)
+        .style('fill', 'black')
+        .style('font-weight', 'bold')
+
+
+         d3.selectAll('Circle')
+        .attr('r', function(d) {
+           if (d.entity === e.entity) {
+             return 8
+           } else {
+             return 4
+           }
+         })
+         .attr('stroke-width', function(d){
+           if (d.entity === e.entity){
+             return 1.5
+           }
+           else {return 1}
+         })
+// highlight pie chart slice
+         d3.selectAll('#arc_'+(e.place).replace(/\s+/g, '').replace(/\./g, ""))
+         .style('opacity', 1)
+// highlight pie chart legend
+         d3.selectAll('#arclegend_'+(e.place).replace(/\s+/g, '').replace(/\./g, ""))
+         .style('font-weigth', 'bold')
+         .style('opacity', 1)
+         .style('font-size', 22)
+      })
+       .on("mouseout", function(e){
+        d3.select("#legend_"+ e.name)
+        .style('fill', 'grey')
+        .style('font-weight','normal')
+
+
+         d3.selectAll('Circle')
+
+       .style("stroke-width", function(d){if (d.winner === 'True'){return 1}})
+       .attr('r', 4)
+
+       d3.selectAll('#arc_'+(e.place).replace(/\s+/g, '').replace(/\./g, ""))
+       .style('opacity', 0.5)
+
+       d3.selectAll('#arclegend_'+(e.place).replace(/\s+/g, '').replace(/\./g, ""))
+       .style('font-weight','normal')
+       .style('opacity', 0.8)
+       .style('font-size', 18)
+
+
+
+
+     })
+
+
+
+
+}
+
+
+
+
+
+  function draw_list(data, x_start, x_end, y_start, y_end, category, winner, id) {
+
+
+     	var parsedTime = d3.timeParse("%Y-%m-%d")
+      var displayTime = d3.timeFormat("%Y-%m-%d")
+			let liste = []
+			data.forEach(function(line) {
+        if (line.category=== category && line.winner === "True") {
+          liste.push(line)
+      }
+
+
+     })
+
+
+      svg.selectAll('.'+id).
+      data(liste).enter()
+      	.append('text')
+      	.attr("x",  x_start + margin.left)
+      	.attr("y", function(d,i){return y_start + 30*(i+1)} )
+        .attr('stroke-width', 1)
+      	.text(function(d) { return d.year})
+
+     svg.selectAll('.'+id).
+      data(liste).enter()
+      	.append('text')
+      	.attr("x",  x_start + margin.left + 40)
+      	.attr("y", function(d,i){return y_start +30*(i+1)} )
+        .attr('stroke-width', 1)
+
+      	.text(function(d) { return d.entity})
+
+     .on("mouseover", function(e){
+         d3.selectAll('#legend'+e.name)
+        .style('fill', 'grey')
+        .style('font-weight', 'normal')
+
+         d3.selectAll('Circle')
+         .style('fill', function(d) {
+           if (d===e) {
+             return 'grey'
+           } else {
+             return 'white'
+           }
+         })
+
+
+      })
+       .on("mouseout", function(d){
+         d3.selectAll('Text')
+        .style('fill', 'black')
+         d3.selectAll('Circle')
+       .style('fill', 'white')
+
+     })
+
+  }
+
+  // Add category
+
+function draw_selected_category(x_start, y_start, category, id){
+    let liste_cat = []
+    for (i=0;i < selected_category.length; i++){
+        liste_cat.push({'category':selected_category[i]})
+      }
+
+  cat_name = svg.selectAll('.'+id)
+  cat_name
+  .data(liste_cat).enter()
+  .append('text')
+  .attr("x",  x_start)
+  .attr("y", function(d,i){return (y_start  + i*170 - 20)})
+  .style('fill', function(d){return color_circle(d)})
+  .style('stroke','')
+  .style('font-weight', 'bold')
+  .style('font-size', 16)
+  .text(function(d){return d.category})
+
+ }
+
+
+    function draw_res(data, x_start, x_end, y_start, y_end, category, year, j_id,  id) {
+
+      var tooltip = d3.select("body")
+      	.append("div")
+      	.style("position", "absolute")
+      	.style("z-index", "10")
+        .style("background-color", "white")
+        .style("border", "solid")
+        .style("border-width", "2px")
+        .style("border-radius", "5px")
+        .style("padding", "5px")
+      	.style("visibility", "hidden")
+      	.text("a simple tooltip");
+
+
+
+     	var parsedTime = d3.timeParse("%Y-%m-%d")
+      var displayTime = d3.timeFormat("%Y-%m-%d")
+			let liste = []
+      let liste_cat = []
+      for (i=0;i < selected_category.length; i++){
+          liste_cat.push({'category':selected_category[i]})}
+
+			data.forEach(function(line) {
+        if (line.category=== category && parseInt(line.year) === year) {
+          liste.push(line)
+      }
+    })
+console.log('liste_res', liste)
+
+//Add actors' and actress' picture
+    svg.selectAll('.'+id).
+      data(liste).enter()
+     .append('image')
+
+     .attr("x",  function(d,i){return x_start +110*(i)} )
+     .attr("y", y_start+170*j_id)
+    .attr('xlink:href', function(d) {
+       var link = "https://www.salonlfc.com/wp-content/uploads/2018/01/image-not-found-1-scaled-1150x647.png"
+       if (d["picture_link"]) {link = d["picture_link"]}
+       return link})
+    .attr('width', 90)
+    .attr('height', 90)
+
+    .on("mouseover", function(e){
+      tooltip.style("visibility", "visible")
+
+//Souris sur une photo
+         d3.selectAll('#legend_'+ e.name)
+        .style('fill', 'black')
+        .style('font-weight', 'bold')
+
+         d3.selectAll('Circle')
+        .attr('r', function(d) {
+           if (d.entity === e.entity) {
+             return 8
+           } else {
+             return 4
+           }
+         })
+// highlight pie chart slice
+         d3.selectAll('#arc_'+(e.place).replace(/\s+/g, '').replace(/\./g, ""))
+         .style('opacity', 1)
+
+// highlight pie chart legend
+         d3.selectAll('#arclegend_'+(e.place).replace(/\s+/g, '').replace(/\./g, ""))
+         .style('font-weigth', 'bold')
+         .style('opacity', 1)
+         .style('font-size', 22)
+
+      })
+
+      	.on("mousemove", function(e){
+          return tooltip.html("Name : " + e.entity + "<br>Age : " + e.age + "<br>Nationality :" + e.place +"<br>Number of Nomination : " + count_nomination(e, data)[0] +"<br>Number of Oscar : " + count_nomination(e, data)[1])
+          .style("top", (event.pageY-10)+"px")
+          .style("left",(event.pageX+10)+"px");})
+
+       .on("mouseout", function(e){
+         d3.selectAll('#legend_'+e.name)
+        .style('fill', 'grey')
+        .style('font-weight', 'normal')
+
+         d3.selectAll('Circle')
+       .style('fill', function(d) {return color_circle(d)})
+       .attr('r', 4)
+
+        tooltip
+       .style("visibility", "hidden")
+
+       d3.selectAll('#arc_'+(e.place).replace(/\s+/g, '').replace(/\./g, ""))
+       .style('opacity', 0.5)
+
+       d3.selectAll('#arclegend_'+(e.place).replace(/\s+/g, '').replace(/\./g, ""))
+       .style('font-weigth', 'normal')
+       .style('opacity', 0.8)
+       .style('font-size', 18)
+
+})
+// Add legend on picture
+     var act_name = svg.selectAll('.'+id)
+      act_name.
+      data(liste).enter()
+      	.append('text')
+        .attr('id', function(d){return 'legend_'+ d.name})
+      	.attr("x",  function(d,i){return x_start +110*(i)})
+      	.attr("y", y_start+170*j_id+110)
+        .style('fill', 'grey')
+      	.text(function(d) { return d.entity})
+
+
+
+//Add oscar image to show the winner
+  const image_osc = svg.selectAll('.'+id)
+      image_osc
+      .data(liste).enter()
+     .append('image')
+     .attr("x", function(d,i){return x_start +110*(i)+20}  )
+     .attr("y", y_start+170*j_id+95)
+    .attr('xlink:href', function(d) {
+       var link = ""
+       if (d.winner === "True"){
+        link = "http://fr.web.img3.acsta.net/r_640_360/medias/nmedia/19/01/12/30/20642080.jpg"
+       }
+      return link})
+    .attr('width', 50)
+    .attr('height', 50)
+
+  }
+
+
+ function draw_piechart(data, x_start, y_start, category, year, id){
+
+   var parsedTime = d3.timeParse("%Y-%m-%d")
+   var displayTime = d3.timeFormat("%Y-%m-%d")
+   let liste = []
+   for (i=0; i< category.length; i++){
+     cat = category[i]
+     console.log('cat', i)
+   data.forEach(function(line) {
+     //console.log( 'line', line)
+     if (line.category=== cat && parseInt(line.year) === year) {
+       liste.push(line)
+   }
+ })}
+    	var radius = 125
+
+    // append the svg object to the div called 'nationality'
+
+      var nat = [{key: " U.S.",
+              value: 0}]
+
+console.log('liste_pie', liste)
+
+      liste.forEach(function(line) {
+
+        for (j=0; j< category.length; j++){
+        //console.log('cat', line.category, category[i])
+        if (line.category === category[j] && (parseInt(line.year) === selected_year)){
+          var nationality = line.place
+
+          for (i=0;i < nat.length; i++){
+          console.log( line, 'new_nat', nationality, 'nat_i',nat[i])
+          if (nat[i].key === nationality){
+              nat[i].value ++;console.log('cas1', nat[i].value, nat[i]); i = nat.length;
+            }
+
+      	   else if (i === nat.length - 1){
+              {nat.push({
+                  key: nationality,
+                  value: 1});
+                  i = nat.length;
+                  console.log('cas2',nat);
+            }
+          }
+
+        }}}})
+
+
+    // Compute the position of each group on the pie:
+    var pie = d3.pie()
+    						.value(function(d) {return d.value })
+    var data_ready = pie(nat)
+
+    // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
+
+    // shape helper to build arcs:
+    var arcGenerator = d3.arc()
+      .innerRadius(0)
+      .outerRadius(radius)
+
+    //var color = d3.scaleOrdinal(d3.schemeCategory20)
+    var color = d3.scaleOrdinal()
+        .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"])
+
+
+    // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
+    svg
+      .selectAll('.'+id)
+      .data(data_ready)
+      .enter()
+      .append('path')
+       .attr("transform", "translate(" + 3 * x_start /2 + "," + y_start + ")")
+        .attr('d', arcGenerator)
+        .attr('id', function(d){return "arc_" + d.data.key.replace(/\s+/g, '').replace(/\./g, '')})
+    		.attr("fill", function(d){return color(d.data.key)})
+        .attr("stroke", "black")
+        .style("stroke-width", "2px")
+        .style("opacity", 0.5)
+
+//mouse on the pie chart
+// highlight results
+        .on("mouseover", function(e){
+          liste.forEach(function(line) {if (e.data.key === line.place){
+          return d3.selectAll("#legend_"+line.name)
+         .style('fill','black')
+           .style('font-weight', 'bold')}})
+// highlight pie chart slice
+           d3.selectAll('#arc_'+(e.data.key).replace(/\s+/g, '').replace(/\./g, ""))
+           .style('opacity', 1)
+// highlight pie chart legend
+          d3.selectAll('#arclegend_'+(e.data.key.replace(/\s+/g, '').replace(/\./g, '')))
+          .style('font-weigth', 'bold')
+          .style('opacity', 1)
+          .style('font-size', 20)
+
+// highlight scatter plot
+          data.forEach(function(line) {if (e.data.key === line.place){
+          return d3.selectAll("#circle_"+line.name)
+         .attr('r', 8)
+       }})
+
+         })
+
+         .on("mouseout", function(e){liste.forEach(function(line) {if (e.data.key === line.place){
+           return d3.selectAll("#legend_"+line.name)
+          .style('fill','grey')
+            .style('font-weight', 'normal')}})
+
+            d3.selectAll('#arc_'+(e.data.key).replace(/\s+/g, '').replace(/\./g, ""))
+            .style('opacity', 0.5)
+
+          d3.selectAll('#arclegend_'+(e.data.key.replace(/\s+/g, '').replace(/\./g, '')))
+          .style('font-weigth', 'normal')
+          .style('opacity', 0.7)
+          .style('font-size', 18)
+
+        d3.selectAll('Circle')
+         .attr('r', 4)
+
+          })
+
+
+
+    svg
+        .selectAll('.'+id)
+        .data(data_ready)
+          .enter()
+            .append('text')
+              .text(function(d) { return '• ' + d.data.key + " : " + d.data.value})
+              .attr('id', function(d){return "arclegend_" + d.data.key.replace(/\s+/g, '').replace(/\./g, '')})
+              .attr('fill', function(d){return color(d.data.key)})
+    					.attr('x', x_start + 500 )
+              .attr('y', function(d, i) { return margin.top + 20 * (i + 1); })
+              .style('font-weigth', 'normal')
+              .style('font-size', 18)
+              .style('opacity', 0.8)
+
+    }
+
+
+  </script>
+
+</body>
