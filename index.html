@@ -258,7 +258,7 @@ svg.append("rect")
     svg.append("text")
       .attr('id', 'axisx')
              .attr("transform",
-            "translate(" + ((x_end-x_start)/2) + " ," + 
+            "translate(" + (x_start+(x_end-x_start)/2) + " ," + 
                            (height + margin.top + 10) + ")")
        .style('font-size', 12)
        .style("text-anchor", "middle")
@@ -278,8 +278,8 @@ svg.append("rect")
     .attr('id', 'axisy')	     
       .attr("transform", "rotate(-90)")
              .attr("transform",
-            "translate(" + (x_start-10) + " ," + 
-                           (y_end-y_start)/2 + ")")
+            "translate(" + (x_start-20) + " ," + 
+                           y_start-(y_end-y_start)/2 + ")")
      .style('font-size', 12)
      .style("text-anchor", "middle")
      .text("Age");
