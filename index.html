@@ -507,10 +507,24 @@ function draw_selected_category(x_start, y_start, category, id){
 console.log('liste_res', liste)
 
 //Add actors' and actress' picture
-    svg.selectAll('.'+id).
+    var picture = svg.selectAll('.'+id).
       data(liste).enter()
-     .append('image')
 
+      picture
+        .append('rect')
+        .attr('id', function(d){return 'image-border_'+d.name.replace(/\s+/g, '').replace(/\./g, "")})
+        .attr("x",  function(d,i){return x_start +110*(i)} )
+        .attr("y", y_start+170*j_id - 5)
+        .attr('width', 90)
+        .attr('height', 124)
+        .style('fill', 'transparent')
+        .style('stroke', 'transparent')
+        .style('stroke-width', 2)
+
+
+     picture
+     .append('image')
+     .attr('id', function(d){return 'picture_'+ d.name.replace(/\s+/g, '').replace(/\./g, "")})
      .attr("x",  function(d,i){return x_start +110*(i)} )
      .attr("y", y_start+170*j_id)
     .attr('xlink:href', function(d) {
@@ -518,13 +532,21 @@ console.log('liste_res', liste)
        if (d["picture_link"]) {link = d["picture_link"]}
        return link})
     .attr('width', 90)
-    .attr('height', 90)
+    .attr('height', 90, console.log('taille', d3.selectAll('#picture_Halle').node().getBBox().height))
+
+
+
+
 
     .on("mouseover", function(e){
-      tooltip.style("visibility", "visible")
+      d3.selectAll('#image-border_'+e.name.replace(/\s+/g, '').replace(/\./g, ""))
+      .style('stroke', 'black')
+
+      tooltip
+      .style("visibility", "visible")
 
 //Souris sur une photo
-         d3.selectAll('#legend_'+ e.name)
+         d3.selectAll('#legend_'+ e.name.replace(/\s+/g, '').replace(/\./g, ""))
         .style('fill', 'black')
         .style('font-weight', 'bold')
 
@@ -572,6 +594,9 @@ console.log('liste_res', liste)
        .style('font-weigth', 'normal')
        .style('opacity', 0.8)
        .style('font-size', 18)
+
+         d3.selectAll('#image-border_'+e.name.replace(/\s+/g, '').replace(/\./g, ""))
+         .style('stroke', 'transparent')
 
 })
 // Add legend on picture
@@ -703,7 +728,7 @@ console.log('liste_pie', liste)
 
 // highlight scatter plot
           data.forEach(function(line) {if (e.data.key === line.place){
-          return d3.selectAll("#circle_"+line.name)
+          return d3.selectAll("#circle_"+line.name.replace(/\s+/g, '').replace(/\./g, ""))
          .attr('r', 8)
        }})
 
