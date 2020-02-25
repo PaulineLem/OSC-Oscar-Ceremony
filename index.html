@@ -15,6 +15,17 @@
   <style>
     body { margin:0;top:0;right:0;bottom:0;left:0; }
     h1 {color:#b7a164; }
+
+    .row {
+  display: flex;
+}
+  select {
+    
+  }
+
+.column {
+  flex: 50%;
+}
   </style>
 </head>
 
@@ -26,15 +37,16 @@
 
     <h1 align="center"> Les disparités aux Oscars (2001-2017)</h1>
 
-    <div class="input-field col s12">
-    <select multiple id = "category">
-    </select>
-    <label>Select a category</label>
-  </div>
-  <div class="input-field col s12"></div>
+    <div class="row">
+      <div class="column">     <select multiple id = "category" >
+      </select>
+      <label>Select a category</label></div>
+      <div class="column">   <h3 id = "selected_year"  align="center" style="color:grey" default="2001"> {$selected_year}</h3>
+        <div  align="center" style="color:grey"> Cliquer sur le graphique pour sélectionner l'année (2001 par défaut)</div></div>
+    </div>
 
-    <h3 id = "selected_year"  align="center" style="color:grey" default="2001"> </h3>
-    <div  align="center" style="color:grey"> Cliquer sur le graphique pour sélectionner l'année</div>
+
+ 
 
     
   <div id="my_dataviz"></div>
@@ -303,26 +315,21 @@ console.log('year1', selected_year)
 
 
 
-
-
-
 var jitterWidth = 10
-svg
-  .selectAll("indPoints")
+svg.selectAll("indPoints")
   .data(liste)
-  .enter()
-  .append("circle")
-    .attr("id", function(d){return 'circle_'+d.name})
-    .attr("cx", function(d){ return(scale_x(parseInt(d.year)) - jitterWidth/2 + Math.random()*jitterWidth )})
-    .attr("cy", function(d){return(y(d.age))})
-    .attr("r", 4)
-    .style("fill", function(d) {return color_circle(d)})
-    .attr("stroke", "black") //couleur
-    .attr("opacity", function(d){if (d.winner === 'False'){return 0.5} })
-    .attr("stroke-width", function(d){if (d.winner === 'True'){return 1}})
-
-
-
+  .enter().append('g')
+      .attr("id", function(d){return 'circle_'+d.name})
+      .attr("class", "symbol")
+      .attr("transform", function(d){ return `translate(${scale_x(parseInt(d.year)) - jitterWidth/2 + Math.random()*jitterWidth},${y(d.age)})`})
+      .attr("opacity", 0.5)
+      .call(g => g.append("path")
+        .attr("fill", function(d) {return color_circle(d)})
+        .attr("d", function(d) { var symbol = d3.symbol().type(d3.symbolCircle).size("60")(); 
+                                  if (d.winner === "True") {
+                                    symbol = d3.symbol().type(d3.symbolStar).size("60")();
+                                  }
+                                  return symbol}))
 // Souris sur le scatter plot
     .on("mouseover", function(e){
         tooltip.style("visibility", "visible")
@@ -335,20 +342,22 @@ svg
         .style('font-weight', 'bold')
 
 
-         d3.selectAll('Circle')
-        .attr('r', function(d) {
+         d3.selectAll('.symbol')
+        .attr('opacity', function(d) {
+          console.log(d,e);
            if (d.entity === e.entity) {
-             return 8
+             return 1
            } else {
-             return 4
+             return 0.5
            }
          })
-         .attr('stroke-width', function(d){
-           if (d.entity === e.entity){
-             return 1.5
-           }
-           else {return 1}
-         })
+        //  .attr('stroke-width', function(d){
+        //    if (d.entity === e.entity){
+        //      return 1.5
+        //    }
+        //    else {return 1}
+        //  })
+
 
 
 // highlight pie chart slice
@@ -374,10 +383,10 @@ svg
         .style('font-weight','normal')
 
 
-         d3.selectAll('Circle')
+         d3.selectAll('.symbol')
 
-       .style("stroke-width", function(d){if (d.winner === 'True'){return 1}})
-       .attr('r', 4)
+      //  .style("stroke-width", function(d){if (d.winner === 'True'){return 1}})
+       .attr('opacity', 0.5)
 
 
        tooltip
@@ -406,63 +415,6 @@ svg
 
 
 
-  function draw_list(data, x_start, x_end, y_start, y_end, category, winner, id) {
-
-
-     	var parsedTime = d3.timeParse("%Y-%m-%d")
-      var displayTime = d3.timeFormat("%Y-%m-%d")
-			let liste = []
-			data.forEach(function(line) {
-        if (line.category=== category && line.winner === "True") {
-          liste.push(line)
-      }
-
-
-     })
-
-
-      svg.selectAll('.'+id).
-      data(liste).enter()
-      	.append('text')
-      	.attr("x",  x_start + margin.left)
-      	.attr("y", function(d,i){return y_start + 30*(i+1)} )
-        .attr('stroke-width', 1)
-      	.text(function(d) { return d.year})
-
-     svg.selectAll('.'+id).
-      data(liste).enter()
-      	.append('text')
-      	.attr("x",  x_start + margin.left + 40)
-      	.attr("y", function(d,i){return y_start +30*(i+1)} )
-        .attr('stroke-width', 1)
-        .style('font-size', 10)
-      	.text(function(d) { return d.entity})
-
-     .on("mouseover", function(e){
-         d3.selectAll('#legend'+e.name)
-        .style('fill', 'grey')
-        .style('font-weight', 'normal')
-
-         d3.selectAll('Circle')
-         .style('fill', function(d) {
-           if (d===e) {
-             return 'grey'
-           } else {
-             return 'white'
-           }
-         })
-
-
-      })
-       .on("mouseout", function(d){
-         d3.selectAll('Text')
-        .style('fill', 'black')
-         d3.selectAll('Circle')
-       .style('fill', 'white')
-
-     })
-
-  }
 
   // Add category
 
@@ -515,7 +467,6 @@ function draw_selected_category(x_start, y_start, category, id){
           liste.push(line)
       }
     })
-console.log('liste_res', liste)
 
 //Add actors' and actress' picture
     var picture = svg.selectAll('.'+id).
@@ -543,12 +494,7 @@ console.log('liste_res', liste)
        if (d["picture_link"]) {link = d["picture_link"]}
        return link})
     .attr('width', 90)
-    .attr('height', 90, console.log('taille', d3.selectAll('#picture_Halle').node().getBBox().height))
-
-
-
-
-
+    .attr('height', 90)
     .on("mouseover", function(e){
       d3.selectAll('#image-border_'+e.name.replace(/\s+/g, '').replace(/\./g, ""))
       .style('stroke', 'black')
@@ -561,12 +507,13 @@ console.log('liste_res', liste)
         .style('fill', 'black')
         .style('font-weight', 'bold')
 
-         d3.selectAll('Circle')
-        .attr('r', function(d) {
+         d3.selectAll('.symbol')
+        .attr('opacity', function(d) {
+          console.log(d,e);
            if (d.entity === e.entity) {
-             return 8
+             return 1
            } else {
-             return 4
+             return 0.5
            }
          })
 // highlight pie chart slice
@@ -591,9 +538,9 @@ console.log('liste_res', liste)
         .style('fill', 'grey')
         .style('font-weight', 'normal')
 
-         d3.selectAll('Circle')
+         d3.selectAll('.symbol')
        .style('fill', function(d) {return color_circle(d)})
-       .attr('r', 4)
+       .attr('opacity', 0.5)
 
         tooltip
        .style("visibility", "hidden")
@@ -739,10 +686,10 @@ console.log('liste_pie', liste)
           .style('font-size', 20)
 
 // highlight scatter plot
-          data.forEach(function(line) {if (e.data.key === line.place){
-          return d3.selectAll("#circle_"+line.name.replace(/\s+/g, '').replace(/\./g, ""))
-         .attr('r', 8)
-       }})
+      //     data.forEach(function(line) {if (e.data.key === line.place){
+      //     return d3.selectAll("#circle_"+line.name.replace(/\s+/g, '').replace(/\./g, ""))
+      //    .attr('opacity', 1)
+      //  }})
 
          })
 
@@ -759,8 +706,8 @@ console.log('liste_pie', liste)
           .style('opacity', 0.7)
           .style('font-size', 18)
 
-        d3.selectAll('Circle')
-         .attr('r', 4)
+        d3.selectAll('.symbol')
+         .attr('opacity', 0.5)
 
           })
 
