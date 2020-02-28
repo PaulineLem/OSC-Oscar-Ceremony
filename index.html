@@ -13,7 +13,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-alpha.4/js/materialize.min.js"></script>
 
   <style>
-    body { margin:0;top:0;right:10;bottom:0;left:10; }
+    body { margin:0;top:0;right:10;bottom:0;left:10;
+     min-height: 100vh;
+     flex-direction: column; }
     .title {color:#b7a164; margin-top: 5 !important; font-size: 40px !important;}
     .year_selected {margin-top: 0; font-size: 30px !important;}
 
@@ -21,40 +23,61 @@
   display: flex;
   margin-bottom: 0;
 }
-  select {
 
-  }
 
 .column {
   flex: 50%;
 }
+
+
+ main {
+     flex: 1 0 auto;
+ }
+ .page-footer{
+   background-color: #b7a164;
+   padding-top: 0;
+
+ }
+
+label {
+  top:50px !important; 
+ }
+ 
   </style>
 </head>
-
 
 <body >
 
 
+  <main>
 
 
-    <div class="title" align="center"> Les disparités aux Oscars (2001-2017)</div>
+    <div class="title" align="center">   Disparities in the Oscars' results (2001-2017)</div>
 
     <div class="row">
       <div class="column">     <select multiple id = "category" >
       </select>
       <label>Select a category</label></div>
       <div class="column">   <div class="year_selected" id = "selected_year"  align="center" style="color:grey" default="2001" > </div>
-        <div  align="center" style="color:grey"> Cliquer sur le graphique pour sélectionner l'année</div></div>
+        <div  align="center" style="color:grey"> Click on the graph to select a year.</div></div>
     </div>
 
 
 
 
 
-  <div id="my_dataviz"></div>
 
+  </main>
 
-
+  <footer class="page-footer">
+    <div class="footer-copyright">
+    <div class="container">
+      <p class="left"> Data extracted from <a class="grey-text text-lighten-3 " href="https://www.kaggle.com/theacademy/academy-awards">Kaggle</a>  </p>
+      <p class = "right"> <a class="grey-text text-lighten-3" href="https://github.com/PaulineLem/OSC-Oscar-Ceremony">Source code</a></p>
+      <p class = "center">Ecole Centrale de Lyon - MOS 5.5 - <a class="grey-text text-lighten-3" href="https://github.com/LyonDataViz/MOS5.5-Dataviz">Data Visualization class</a> </p>
+    </div>
+    </div>
+  </footer>
 
 
 
@@ -100,9 +123,9 @@ var margin = {top: 50, right: 20, bottom: 20, left: 20};
 var width = x- margin.left - margin.right,
     height = y - margin.top - margin.bottom-200;
 
-var svg = d3.select("body").append("svg")
+var svg = d3.select("main").append("svg")
     .attr("width", x)
-    .attr("height",y)
+    .attr("height",y-100)
 
 
  var data = d3.json('https://raw.githubusercontent.com/PaulineLem/OSC-Oscar-Ceremony/master/data_json_v2_pict.json', function(error, dataset){
@@ -161,14 +184,14 @@ function launch_drawing(selected_year, selected_category, dataset,  margin, spac
 
     if (selected_year && selected_category) {
       //console.log('params', selected_year, selected_category)
-        draw_selected_year(margin.left + space[0], 2 *space[0], margin.top + space[1]/3 , space[1],  selected_year)
+        draw_selected_year(margin.left + space[0], 2 *space[0], margin.top + space[1]/3 , margin.top+space[1],  selected_year)
         draw_selected_category(margin.left, margin.top, selected_category,'plotcat')
         draw_piechart(dataset,  space[0] , space[1]/6 + 40, selected_category, selected_year, 'plotpie' )
 
         for (var j = 0; j < selected_category.length; j++) {
 
             draw_res(dataset, margin.left, space[0], margin.top, space[1], selected_category[j], selected_year,j, 'plot'+(j+1).toString())
-            draw_scatter(dataset,margin.left + space[0], 2 *space[0] , margin.top + space[1]/3 , space[1],  selected_category[j], selected_year,  true, 'plot'+(j*10+1).toString())
+            draw_scatter(dataset,margin.left + space[0], 2 *space[0] , margin.top + space[1]/3 , margin.top+space[1],  selected_category[j], selected_year,  true, 'plot'+(j*10+1).toString())
 
         }
 }
@@ -181,8 +204,8 @@ function launch_drawing(selected_year, selected_category, dataset,  margin, spac
    function color_circle(act){
           if (act.category === 'ACTRESS IN A LEADING ROLE') {return '#ff6d00'}
           else if (act.category === 'ACTOR IN A LEADING ROLE') {return '#00796b'}
-          else if (act.category === 'ACTOR IN A SUPPORTING ROLE') {return '#b2dfdb'}
-          else {return '#ffcc80'}
+          else if (act.category === 'ACTOR IN A SUPPORTING ROLE') {return '#0079CD'}
+          else {return '#FF6C80'}
 
       }
 
@@ -223,7 +246,7 @@ svg.append("rect")
 
      function draw_scatter(data, x_start, x_end, y_start, y_end, category, selected_year, winner, id) {
 
-       var tooltip = d3.select("body")
+       var tooltip = d3.select("main")
          .append("div")
          .style("position", "absolute")
          .style("z-index", "10")
@@ -282,7 +305,7 @@ svg.append("rect")
     .domain([2000, 2018])
 
   svg.append("g")
-    .attr("transform", "translate(0," + height + ")")
+    .attr("transform", "translate(0," +  y_end + ")")
     .call(d3.axisBottom(scale_x))
 
 
@@ -291,7 +314,7 @@ svg.append("rect")
       .attr('id', 'axisx')
              .attr("transform",
             "translate(" + (x_start+(x_end-x_start)/2) + " ," +
-                           (height + margin.top ) + ")")
+                           (y_end + 40 ) + ")")
        .style('font-size', 12)
        .style("text-anchor", "middle")
        .text("Year");
@@ -451,7 +474,7 @@ function draw_selected_category(x_start, y_start, category, id){
 
     function draw_res(data, x_start, x_end, y_start, y_end, category, year, j_id,  id) {
 
-      var tooltip = d3.select("body")
+      var tooltip = d3.select("main")
       	.append("div")
       	.style("position", "absolute")
       	.style("z-index", "10")
