@@ -40,9 +40,11 @@
  }
 
 label {
-  top:50px !important; 
+
+  top:50px !important;
  }
- 
+
+
   </style>
 </head>
 
@@ -415,7 +417,7 @@ svg.selectAll("indPoints")
 
         d3.selectAll('#image-border_'+e.name.replace(/\s+/g, '').replace(/\./g, ""))
         .style('stroke', 'transparent')
-        
+
          d3.selectAll('.symbol')
 
       //  .style("stroke-width", function(d){if (d.winner === 'True'){return 1}})
@@ -457,16 +459,17 @@ function draw_selected_category(x_start, y_start, category, id){
         liste_cat.push({'category':selected_category[i]})
       }
 
+// add category's names
   cat_name = svg.selectAll('.'+id)
   cat_name
   .data(liste_cat).enter()
   .append('text')
   .attr("x",  x_start)
-  .attr("y", function(d,i){return (y_start  + i*170 - 20)})
+  .attr("y", function(d,i){return (y_start  + i*height/3 - 10)})
   .style('fill', function(d){return color_circle(d)})
   .style('stroke','')
   .style('font-weight', 'bold')
-  .style('font-size', 16)
+  .style('font-size', 12)
   .text(function(d){return d.category})
 
  }
@@ -508,10 +511,12 @@ function draw_selected_category(x_start, y_start, category, id){
       picture
         .append('rect')
         .attr('id', function(d){return 'image-border_'+d.name.replace(/\s+/g, '').replace(/\./g, "")})
-        .attr("x",  function(d,i){return x_start +110*(i)} )
-        .attr("y", y_start+170*j_id - 5)
-        .attr('width', 90)
-        .attr('height', 124)
+        .attr("x",  function(d,i){return x_start +width/12*(i)} )
+        .attr("y", y_start+height/3*j_id)
+        //.attr("x",  function(d,i){return x_start +110*(i)} )
+        //.attr("y", y_start+170*j_id - 5)
+        .attr('width', 70)
+        .attr('height', 90)
         .style('fill', 'transparent')
         .style('stroke', 'transparent')
         .style('stroke-width', 2)
@@ -520,14 +525,14 @@ function draw_selected_category(x_start, y_start, category, id){
      picture
      .append('image')
      .attr('id', function(d){return 'picture_'+ d.name.replace(/\s+/g, '').replace(/\./g, "")})
-     .attr("x",  function(d,i){return x_start +110*(i)} )
-     .attr("y", y_start+170*j_id)
+     .attr("x",  function(d,i){return x_start +width/12*(i)} )
+     .attr("y", y_start+height/3*j_id)
     .attr('xlink:href', function(d) {
        var link = "https://www.salonlfc.com/wp-content/uploads/2018/01/image-not-found-1-scaled-1150x647.png"
        if (d["picture_link"]) {link = d["picture_link"]}
        return link})
-    .attr('width', 90)
-    .attr('height', 90)
+    .attr('width', width/20)
+    .attr('height', width/20)
     .on("mouseover", function(e){
       d3.selectAll('#image-border_'+e.name.replace(/\s+/g, '').replace(/\./g, ""))
       .style('stroke', 'black')
@@ -596,8 +601,8 @@ function draw_selected_category(x_start, y_start, category, id){
       data(liste).enter()
       	.append('text')
         .attr('id', function(d){return 'legend_'+ d.name})
-      	.attr("x",  function(d,i){return x_start +110*(i)})
-      	.attr("y", y_start+170*j_id+110)
+        .attr("x",  function(d,i){return x_start +width/12*(i)} )
+        .attr("y", y_start+height/3*(j_id+0.65))
         .style('fill', 'grey')
         .style('font-size', 12)
       	.text(function(d) { return d.entity})
@@ -609,16 +614,18 @@ function draw_selected_category(x_start, y_start, category, id){
       image_osc
       .data(liste).enter()
      .append('image')
-     .attr("x", function(d,i){return x_start +110*(i)+20}  )
-     .attr("y", y_start+170*j_id+95)
+     .attr("x",  function(d,i){return x_start +width/12*(i+0.1)} )
+     .attr("y", y_start+height/3*(j_id+0.6))
+     //.attr("x", function(d,i){return x_start +width/20*(i)}  )
+     //.attr("y", y_start+width/20*j_id+75)
     .attr('xlink:href', function(d) {
        var link = ""
        if (d.winner === "True"){
         link = "http://fr.web.img3.acsta.net/r_640_360/medias/nmedia/19/01/12/30/20642080.jpg"
        }
       return link})
-    .attr('width', 50)
-    .attr('height', 50)
+    .attr('width', width/35)
+    .attr('height', width/35)
 
   }
 
