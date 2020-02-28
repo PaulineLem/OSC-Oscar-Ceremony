@@ -47,7 +47,10 @@
         <div  align="center" style="color:grey"> Cliquer sur le graphique pour sélectionner l'année</div></div>
     </div>
 
-    
+
+
+
+
   <div id="my_dataviz"></div>
 
 
@@ -281,17 +284,13 @@ svg.append("rect")
   svg.append("g")
     .attr("transform", "translate(0," + height + ")")
     .call(d3.axisBottom(scale_x))
-	    
-     
 
 
 
     svg.append("text")
       .attr('id', 'axisx')
              .attr("transform",
-
-            "translate(" + (x_start+(x_end-x_start)/2) + " ," + 
-
+            "translate(" + (x_start+(x_end-x_start)/2) + " ," +
                            (height + margin.top ) + ")")
        .style('font-size', 12)
        .style("text-anchor", "middle")
@@ -308,9 +307,7 @@ svg.append("rect")
   .call(d3.axisLeft().scale(y))
 
   svg.append("text")
-
     .attr('id', 'axisy')
-
     .attr("transform", "rotate(-90)")
       .attr("y",  (x_start-60) )
       .attr("x",-y_start- (y_end-y_start)/2)
@@ -318,10 +315,7 @@ svg.append("rect")
       .style("text-anchor", "middle")
            .style('font-size', 12)
 
-
       .text("Age");
-
-
 
 
 
@@ -336,9 +330,7 @@ svg.selectAll("indPoints")
       .attr("opacity", 0.5)
       .call(g => g.append("path")
         .attr("fill", function(d) {return color_circle(d)})
-
         .attr("d", function(d) { var symbol = d3.symbol().type(d3.symbolCircle).size("70")();
-
                                   if (d.winner === "True") {
                                     symbol = d3.symbol().type(d3.symbolStar).size("70")();
                                   }
@@ -398,11 +390,9 @@ svg.selectAll("indPoints")
         .style('font-weight','normal')
 
 
-
         d3.selectAll('#image-border_'+e.name.replace(/\s+/g, '').replace(/\./g, ""))
         .style('stroke', 'transparent')
         
-
          d3.selectAll('.symbol')
 
       //  .style("stroke-width", function(d){if (d.winner === 'True'){return 1}})
@@ -732,11 +722,9 @@ console.log('liste_pie', liste)
           .style('font-size', 18)
 
 
-
           liste.forEach(function(line) {if (e.data.key === line.place){
           return d3.selectAll('#image-border_'+line.name.replace(/\s+/g, '').replace(/\./g, ""))
           .style('stroke', 'transparent')}})
-
 
         d3.selectAll('.symbol')
          .attr('opacity', 0.5)
