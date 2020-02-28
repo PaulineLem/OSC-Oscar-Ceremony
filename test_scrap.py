@@ -1,23 +1,20 @@
 from bs4 import BeautifulSoup as bs
 from urllib.request import urlopen
 import csv
+import json
 
+def infobox(actor) :
 
-def infobox(query) :
-    query = query
-    content_list = []
+    acteur = actor["entity"].split()
+    name = ""
+    for part in acteur:
+        name += "_{}". format(part)
+    query = name[1:]
     url = 'https://en.wikipedia.org/wiki/'+query
     raw = urlopen(url)
     soup = bs(raw)
     table = soup.find('table',{'class':'infobox biography vcard'})
-    name = query.split('_')
-    data = {'name':name[0], 'surname':name[1]}
     for tr in table.find_all('tr') :
-        # if len(tr.contents) > 1:
-        #     content_list.append([tr.contents[0].text.encode('utf-8'), tr.contents[1].text.encode('utf-8')])
-        # elif tr.text:
-        #     content_list.append([tr.text.encode('utf-8')])
-        # print(tr.text)
         if(tr.text[:4] == 'Born'):
             k=0
             indice_date = 0
@@ -31,55 +28,36 @@ def infobox(query) :
                 if tr.text[k]==",":
                     indice_place = k+1
                 k-=1
-            data['date'] = tr.text[indice_date:indice_date+10]
-            data['place'] = tr.text[indice_place:]
-            # content_list.append([{'date': tr.text[indice_date:indice_date+10], 'place': tr.text[indice_place:]}])   
+            actor["date"] = tr.text[indice_date:indice_date+10]
+            actor["place"] = tr.text[indice_place:]
         if(tr.text[:11] == 'Nationality'):
             nationality = tr.text[11:]
-            data['nationality'] = nationality
-            # content_list.append([{'nationality':nationality}])
+            actor["nationality"] = nationality
         if(tr.text[:11] == 'Citizenship'):
             citizenship = tr.text[11:]
-            data['citizenship'] = citizenship
-            # content_list.append([{'citizenship':nationality}])
-    content_list.append([data])
+            actor["citizenship"] = citizenship  
+    return actor
 
-        # content_list.append([{'date': tr.text[indice_date:indice_date+10], 'place': tr.text[indice_place:], 'nationality':nationality}])
 
-    
-    return content_list
-    # result = {}
-    # exceptional_row_count = 0
-    # for tr in table.find_all('tr'):
-    #     if tr.find('th'):
-    #         result[tr.find('th').text] = tr.text
-    #     else:
-    #         # the first row Logos fall here
-    #         exceptional_row_count += 1
-    # if exceptional_row_count > 1:
-    #     print('WARNING ExceptionalRow>1: ', table)
-    # return result
-
-def write_csv_file(list):
+def write_json_file(list):
     actors_not_found = []
-
-    with open(r'data_actors-actresses.csv', mode='w') as csv_file:
-        writer = csv.writer(csv_file, delimiter=',')
+    data = []
+    with open(r'data_json_v2.json', mode='w') as json_file:
         for k in list:
             try : 
                 content_list = infobox(k)     
-                writer.writerows(content_list)
+                data.append(content_list)
             except:
                 actors_not_found.append(k)
                 print('Je ne trouve pas l\'url')
+        json.dump(data, json_file)
     return(actors_not_found)
 
-# print(infobox('Jean_Dujardin'))
-# print(infobox('Tom_Cruise'))
-# print(infobox('Hilary_Swank'))
-# print(infobox('Ralph_Fiennes'))
+
 
 # liste = ['Ralph_Fiennes', 'Hilary_Swank','Tom_Cruise',  'Jean_Dujardin' ]
+# write_json_file(liste)
+
 
 
 def list_generation():
@@ -89,20 +67,22 @@ def list_generation():
         for row in readCSV:
             if row[0]!='year':
                 if int(row[0])>2000 and (row[1] in ['ACTOR IN A LEADING ROLE', 'ACTOR IN A SUPPORTING ROLE', 'ACTRESS IN A LEADING ROLE', 'ACTRESS IN A SUPPORTING ROLE']):
-                    acteur = row[3].split()
-                    name = ''
-                    for part in acteur:
-                        name += '_{}'. format(part)
+                    name = row[3].split(" ", 1)
+                    if len(name)>1:
+                        actor = {"entity": row[3], "year": row[0], "category" : row[1], "winner" : row[2], "name":name[0], "surname":name[1]}
+                    else:
+                        actor = {"entity": row[3], "year": row[0], "category" : row[1], "winner" : row[2], "name":name[0], "surname":""}
                     try :
-                        liste.append(name[1:])
+                        liste.append(actor)
                     except:
-                        print(acteur)
-
-    list_not_found = write_csv_file(liste)
+                        print(actor)
+    liste_not_found = write_json_file(liste)
     return liste_not_found
 
 # write_csv_file(liste)
 
 print(list_generation())
+
+
 
 
