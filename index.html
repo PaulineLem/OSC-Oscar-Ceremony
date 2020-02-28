@@ -22,7 +22,7 @@
   margin-bottom: 0;
 }
   select {
-    
+
   }
 
 .column {
@@ -46,9 +46,6 @@
       <div class="column">   <div class="year_selected" id = "selected_year"  align="center" style="color:grey" default="2001" > </div>
         <div  align="center" style="color:grey"> Cliquer sur le graphique pour sélectionner l'année</div></div>
     </div>
-
-
- 
 
     
   <div id="my_dataviz"></div>
@@ -287,10 +284,14 @@ svg.append("rect")
 	    
      
 
+
+
     svg.append("text")
       .attr('id', 'axisx')
              .attr("transform",
+
             "translate(" + (x_start+(x_end-x_start)/2) + " ," + 
+
                            (height + margin.top ) + ")")
        .style('font-size', 12)
        .style("text-anchor", "middle")
@@ -307,7 +308,9 @@ svg.append("rect")
   .call(d3.axisLeft().scale(y))
 
   svg.append("text")
-    .attr('id', 'axisy')	     
+
+    .attr('id', 'axisy')
+
     .attr("transform", "rotate(-90)")
       .attr("y",  (x_start-60) )
       .attr("x",-y_start- (y_end-y_start)/2)
@@ -315,7 +318,10 @@ svg.append("rect")
       .style("text-anchor", "middle")
            .style('font-size', 12)
 
-      .text("Age");   
+
+      .text("Age");
+
+
 
 
 
@@ -330,7 +336,9 @@ svg.selectAll("indPoints")
       .attr("opacity", 0.5)
       .call(g => g.append("path")
         .attr("fill", function(d) {return color_circle(d)})
-        .attr("d", function(d) { var symbol = d3.symbol().type(d3.symbolCircle).size("70")(); 
+
+        .attr("d", function(d) { var symbol = d3.symbol().type(d3.symbolCircle).size("70")();
+
                                   if (d.winner === "True") {
                                     symbol = d3.symbol().type(d3.symbolStar).size("70")();
                                   }
@@ -346,6 +354,8 @@ svg.selectAll("indPoints")
         .style('fill', 'black')
         .style('font-weight', 'bold')
 
+        d3.selectAll('#image-border_'+e.name.replace(/\s+/g, '').replace(/\./g, ""))
+        .style('stroke', 'black')
 
          d3.selectAll('.symbol')
         .attr('opacity', function(d) {
@@ -387,6 +397,11 @@ svg.selectAll("indPoints")
         .style('fill', 'grey')
         .style('font-weight','normal')
 
+
+
+        d3.selectAll('#image-border_'+e.name.replace(/\s+/g, '').replace(/\./g, ""))
+        .style('stroke', 'transparent')
+        
 
          d3.selectAll('.symbol')
 
@@ -690,6 +705,11 @@ console.log('liste_pie', liste)
           .style('opacity', 1)
           .style('font-size', 20)
 
+  // add borders to selected pictures
+             liste.forEach(function(line) {if (e.data.key === line.place){
+             return d3.selectAll('#image-border_'+line.name.replace(/\s+/g, '').replace(/\./g, ""))
+             .style('stroke', 'black')}})
+
 // highlight scatter plot
       //     data.forEach(function(line) {if (e.data.key === line.place){
       //     return d3.selectAll("#circle_"+line.name.replace(/\s+/g, '').replace(/\./g, ""))
@@ -710,6 +730,13 @@ console.log('liste_pie', liste)
           .style('font-weigth', 'normal')
           .style('opacity', 0.7)
           .style('font-size', 18)
+
+
+
+          liste.forEach(function(line) {if (e.data.key === line.place){
+          return d3.selectAll('#image-border_'+line.name.replace(/\s+/g, '').replace(/\./g, ""))
+          .style('stroke', 'transparent')}})
+
 
         d3.selectAll('.symbol')
          .attr('opacity', 0.5)
