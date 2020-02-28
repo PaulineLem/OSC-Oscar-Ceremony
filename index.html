@@ -13,11 +13,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-alpha.4/js/materialize.min.js"></script>
 
   <style>
-    body { margin:0;top:0;right:0;bottom:0;left:0; }
-    h1 {color:#b7a164; }
+    body { margin:0;top:0;right:10;bottom:0;left:10; }
+    .title {color:#b7a164; margin-top: 5 !important; font-size: 40px !important;}
+    .year_selected {margin-top: 0; font-size: 30px !important;}
 
     .row {
   display: flex;
+  margin-bottom: 0;
 }
   select {
     
@@ -35,14 +37,14 @@
 
 
 
-    <h1 align="center"> Les disparités aux Oscars (2001-2017)</h1>
+    <div class="title" align="center"> Les disparités aux Oscars (2001-2017)</div>
 
     <div class="row">
       <div class="column">     <select multiple id = "category" >
       </select>
       <label>Select a category</label></div>
-      <div class="column">   <h3 id = "selected_year"  align="center" style="color:grey" default="2001"> {$selected_year}</h3>
-        <div  align="center" style="color:grey"> Cliquer sur le graphique pour sélectionner l'année (2001 par défaut)</div></div>
+      <div class="column">   <div class="year_selected" id = "selected_year"  align="center" style="color:grey" default="2001" > </div>
+        <div  align="center" style="color:grey"> Cliquer sur le graphique pour sélectionner l'année</div></div>
     </div>
 
 
@@ -96,11 +98,11 @@ var w = window,
 var margin = {top: 50, right: 20, bottom: 20, left: 20};
 
 var width = x- margin.left - margin.right,
-    height = y - margin.top - margin.bottom-50;
+    height = y - margin.top - margin.bottom-200;
 
 var svg = d3.select("body").append("svg")
     .attr("width", x)
-    .attr("height", y)
+    .attr("height",y)
 
 
  var data = d3.json('https://raw.githubusercontent.com/PaulineLem/OSC-Oscar-Ceremony/master/data_json_v2_pict.json', function(error, dataset){
@@ -116,6 +118,8 @@ if (Array.isArray(selected_category) === false){
         selected_category = [selected_category]
       }
  svg.selectAll("*").remove();
+//  document.getElementById('selected_year').textContent = selected_year;
+
 
  launch_drawing(selected_year, selected_category, dataset,  margin, space)
     });
@@ -139,7 +143,7 @@ svg.on("click", function() {
         svg.selectAll("*").remove();
 
 
-    document.getElementById('selected_year').textContent = selected_year;
+    // document.getElementById('selected_year').textContent = selected_year;
 
     launch_drawing(selected_year, selected_category, dataset,  margin, space )
 }
@@ -152,17 +156,19 @@ svg.on("click", function() {
 
  })
 function launch_drawing(selected_year, selected_category, dataset,  margin, space ){
+  document.getElementById('selected_year').textContent = selected_year;
+
 
     if (selected_year && selected_category) {
       //console.log('params', selected_year, selected_category)
-        draw_selected_year(margin.left + space[0], 2 *space[0], margin.top + space[1]/2 , space[1],  selected_year)
+        draw_selected_year(margin.left + space[0], 2 *space[0], margin.top + space[1]/3 , space[1],  selected_year)
         draw_selected_category(margin.left, margin.top, selected_category,'plotcat')
-        draw_piechart(dataset,  space[0] , space[1]/4 + 50, selected_category, selected_year, 'plotpie' )
+        draw_piechart(dataset,  space[0] , space[1]/6 + 40, selected_category, selected_year, 'plotpie' )
 
         for (var j = 0; j < selected_category.length; j++) {
 
             draw_res(dataset, margin.left, space[0], margin.top, space[1], selected_category[j], selected_year,j, 'plot'+(j+1).toString())
-            draw_scatter(dataset,margin.left + space[0], 2 *space[0] , margin.top + space[1]/2 , space[1],  selected_category[j], selected_year,  true, 'plot'+(j*10+1).toString())
+            draw_scatter(dataset,margin.left + space[0], 2 *space[0] , margin.top + space[1]/3 , space[1],  selected_category[j], selected_year,  true, 'plot'+(j*10+1).toString())
 
         }
 }
@@ -211,7 +217,7 @@ svg.append("rect")
   .attr("width", boxWidth )
   .attr("stroke", "grey")
   .attr("fill-opacity", 0.3)
-  .style("fill", "grey")
+  .style("fill", "#EDF1F2")
      }
 
 
@@ -228,7 +234,6 @@ svg.append("rect")
          .style("padding", "5px")
          .style("visibility", "hidden")
 
-console.log('year1', selected_year)
 			var parsedTime = d3.timeParse("%Y-%m-%d")
       var displayTime = d3.timeFormat("%Y-%m-%d")
 			let liste = []
@@ -315,7 +320,7 @@ console.log('year1', selected_year)
 
 
 
-var jitterWidth = 10
+var jitterWidth = 15
 svg.selectAll("indPoints")
   .data(liste)
   .enter().append('g')
@@ -325,9 +330,9 @@ svg.selectAll("indPoints")
       .attr("opacity", 0.5)
       .call(g => g.append("path")
         .attr("fill", function(d) {return color_circle(d)})
-        .attr("d", function(d) { var symbol = d3.symbol().type(d3.symbolCircle).size("60")(); 
+        .attr("d", function(d) { var symbol = d3.symbol().type(d3.symbolCircle).size("70")(); 
                                   if (d.winner === "True") {
-                                    symbol = d3.symbol().type(d3.symbolStar).size("60")();
+                                    symbol = d3.symbol().type(d3.symbolStar).size("70")();
                                   }
                                   return symbol}))
 // Souris sur le scatter plot
@@ -604,7 +609,7 @@ function draw_selected_category(x_start, y_start, category, id){
        liste.push(line)
    }
  })}
-    	var radius = 100
+    	var radius = 80
 
     // append the svg object to the div called 'nationality'
 
