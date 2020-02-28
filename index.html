@@ -724,10 +724,10 @@ console.log('liste_pie', liste)
              .style('stroke', 'black')}})
 
 // highlight scatter plot
-      //     data.forEach(function(line) {if (e.data.key === line.place){
-      //     return d3.selectAll("#circle_"+line.name.replace(/\s+/g, '').replace(/\./g, ""))
-      //    .attr('opacity', 1)
-      //  }})
+          data.forEach(function(line) {if (e.data.key === line.place){
+          return d3.selectAll("#circle_"+line.name.replace(/\s+/g, '').replace(/\./g, ""))
+         .attr('opacity', 1)
+       }})
 
          })
 
